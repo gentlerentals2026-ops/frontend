@@ -5,7 +5,16 @@ export const cartApi = createApi({
   reducerPath: "cartApi",
   baseQuery: fetchBaseQuery({
     baseUrl: `${API.BASE_URL}/api`,
-    credentials: "include"
+    credentials: "include",
+    prepareHeaders: (headers, { getState }) => {
+      const token = getState()?.appState?.acesssToken;
+
+      if (token) {
+        headers.set("authorization", `Bearer ${token}`);
+      }
+
+      return headers;
+    }
   }),
   tagTypes: ["Cart"],
   endpoints: (builder) => ({

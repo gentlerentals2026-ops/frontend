@@ -1,4 +1,5 @@
 import { API } from "../../constant/apiConstant";
+import { getAuthHeaders } from "../../utils/auth";
 import { getErrorMessage, parseJsonSafely } from "../../utils/http";
 
 export const AuthService = {
@@ -32,7 +33,8 @@ export const AuthService = {
         method: "POST",
         credentials: "include",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          ...getAuthHeaders()
         }
       });
 
@@ -55,7 +57,8 @@ export const AuthService = {
         method: "GET",
         credentials: "include",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          ...getAuthHeaders()
         }
       });
 

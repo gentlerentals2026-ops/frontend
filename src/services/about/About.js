@@ -1,4 +1,5 @@
 import { API } from "../../constant/apiConstant";
+import { getAuthHeaders } from "../../utils/auth";
 import { getErrorMessage, parseJsonSafely } from "../../utils/http";
 
 export const AboutService = {
@@ -24,7 +25,8 @@ export const AboutService = {
       method: "PUT",
       credentials: "include",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        ...getAuthHeaders()
       },
       body: JSON.stringify(payload)
     });
