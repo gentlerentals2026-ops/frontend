@@ -1,23 +1,27 @@
 import { API } from "../../constant/apiConstant";
 
-
 export const AccountService = {
-
-     register: async(user)=>{
-      try {
+  register: async (user) => {
+    try {
       const response = await fetch(`${API.BASE_URL}/api/auth/register`, {
         method: "POST",
+        credentials: "include",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify(user),
+        body: JSON.stringify(user)
       });
-    const json = await response.json();
-    return json;
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        throw new Error(json.message || "Unable to create account");
+      }
+
+      return json;
     } catch (error) {
       console.error("Error creating account:", error);
       throw error;
     }
-
-}
-}
+  }
+};

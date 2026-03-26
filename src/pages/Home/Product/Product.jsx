@@ -1,27 +1,37 @@
 import { Box, Grid, Card, CardMedia, CardContent, Typography, Button } from "@mui/material";
-import { useState } from "react";
+import { Link as RouterLink } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { ProductService } from "../../../services/products/Product";
 
 export default function ProductPage() {
   const [showAll, setShowAll] = useState(false);
-
-  const products = [
-    { id: 1, name: "Royal Chair", price: "6,500", image: "https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=800&q=80" },
-    { id: 2, name: "Banquet Chair", price: "5,000", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80" },
-    { id: 3, name: "Round Table", price: "10,000", image: "https://images.unsplash.com/photo-1690458774378-28766fa56d7a?w=900&auto=format&fit=crop&q=60" },
-    { id: 4, name: "Rectangular Table", price: "12,000", image: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=800&q=80" },
-    { id: 5, name: "Event Chair Deluxe", price: "7,000", image: "https://plus.unsplash.com/premium_photo-1724148017224-970f656ad0ed?w=900&auto=format&fit=crop&q=60" },
-    { id: 6, name: "Classic Wooden Chair", price: "8,500", image: "https://images.unsplash.com/photo-1648579299658-2993cb1c9129?w=900&auto=format&fit=crop&q=60" },
-    { id: 7, name: "White Folding Chair", price: "4,000", image: "https://images.unsplash.com/photo-1601014599619-869ce54a5d87?w=900&auto=format&fit=crop&q=60" },
-    { id: 8, name: "Luxury Padded Chair", price: "9,500", image: "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=800&q=80" },
-    { id: 9, name: "Glass Table Round", price: "14,000", image: "https://images.unsplash.com/photo-1668993280424-30a9fb91b6a5?w=900&auto=format&fit=crop&q=60" },
-    { id: 10, name: "Coffee Table", price: "8,000", image: "https://plus.unsplash.com/premium_photo-1755706181305-b1275344a8c6?w=900&auto=format&fit=crop&q=60" }
-  ];
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const isMobile = window.innerWidth < 768;
 
-  // SHOW ONLY 5 ITEMS ON MOBILE UNLESS "VIEW MORE" IS CLICKED
-  const displayedProducts =
-    isMobile && !showAll ? products.slice(0, 5) : products;
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setIsLoading(true);
+        setError("");
+        const response = await ProductService.getProducts();
+        setProducts(response.data || []);
+      } catch (fetchError) {
+        setError(fetchError.message || "Unable to load products right now.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
+
+  const displayedProducts = isMobile && !showAll ? products.slice(0, 5) : products;
+
+  const formatPrice = (price) =>
+    Number(price || 0).toLocaleString("en-NG");
 
   return (
     <Box sx={{ p: { xs: 2, md: 5 } }}>
@@ -29,11 +39,29 @@ export default function ProductPage() {
         Chairs & Tables For Rent
       </Typography>
 
+      {isLoading && (
+        <Typography sx={{ textAlign: "center", mb: 3, color: "gray" }}>
+          Loading rental items...
+        </Typography>
+      )}
+
+      {!isLoading && error && (
+        <Typography sx={{ textAlign: "center", mb: 3, color: "error.main" }}>
+          {error}
+        </Typography>
+      )}
+
+      {!isLoading && !error && displayedProducts.length === 0 && (
+        <Typography sx={{ textAlign: "center", mb: 3, color: "gray" }}>
+          No rental items available yet.
+        </Typography>
+      )}
+
       <Grid container spacing={3} justifyContent="center">
         {displayedProducts.map((item) => (
           <Grid
             item
-            key={item.id}
+            key={item._id}
             xs={6}
             md={4}
             lg={3}
@@ -43,7 +71,7 @@ export default function ProductPage() {
               sx={{
                 width: 350,
                 height: 380,
-                borderRadius: 1,
+                borderRadius: 3,
                 boxShadow: 3,
                 display: "flex",
                 flexDirection: "column",
@@ -51,8 +79,8 @@ export default function ProductPage() {
             >
               <CardMedia
                 component="img"
-                image={item.image}
-                alt={item.name}
+                image={item.imageUrl}
+                alt={item.title}
                 sx={{
                   height: 200,
                   objectFit: "cover",
@@ -66,14 +94,16 @@ export default function ProductPage() {
                 }}
               >
                 <Typography sx={{ fontWeight: 600, fontSize: "1rem" }}>
-                  {item.name}
+                  {item.title}
                 </Typography>
                 <Typography sx={{ mt: 1, color: "gray", fontWeight: 500 }}>
-                  ₦{item.price}
+                  ₦{formatPrice(item.price)}
                 </Typography>
               </CardContent>
 
               <Button
+                component={RouterLink}
+                to={`/products/${item.slug}`}
                 variant="contained"
                 fullWidth
                 sx={{
@@ -84,15 +114,14 @@ export default function ProductPage() {
                   "&:hover": { backgroundColor: "#ff9800" },
                 }}
               >
-                Add to Cart
+                View Listing
               </Button>
             </Card>
           </Grid>
         ))}
       </Grid>
 
-      {/* VIEW MORE BUTTON (MOBILE ONLY) */}
-      {isMobile && !showAll && (
+      {isMobile && !isLoading && !error && products.length > 5 && !showAll && (
         <Button
           variant="outlined"
           onClick={() => setShowAll(true)}

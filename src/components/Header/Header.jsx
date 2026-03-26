@@ -1,5 +1,6 @@
 import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
+import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
@@ -12,35 +13,68 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import DeckIcon from '@mui/icons-material/Deck';
+import { Link as RouterLink } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { AuthService } from "../../services/auth/Auth";
+import { setAccessToken, setIsAuthenticated, setUser } from "../../Redux/Reducers/appState";
+import { cartApi, useGetCartQuery } from "../../services/api/cartApi";
 
-const pages = ['HOME', 'PRODUCTS', 'CART', 'ABOUT', 'CONTACT'];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+const pages = [
+  { label: "HOME", path: "/" },
+  { label: "PRODUCTS", path: "/products" },
+  { label: "ABOUT", path: "/about" },
+  { label: "CONTACT", path: "/contact" },
+  { label: "ACCOUNT", path: "/account" },
+  { label: "CART", path: "/cart" }
+];
 
 const AppHeader = () => {
+  const dispatch = useDispatch();
+  const { isAuthenticated, user } = useSelector((state) => state.appState);
   const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const { data: cartResponse } = useGetCartQuery(undefined, { skip: !isAuthenticated });
+  const items = cartResponse?.data?.items || [];
+  const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
 
-
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
 
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
+  const handleLogout = async () => {
+    try {
+      await AuthService.logout();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      dispatch(setUser({}));
+      dispatch(setIsAuthenticated(false));
+      dispatch(setAccessToken(""));
+      dispatch(cartApi.util.resetApiState());
+    }
   };
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: 'orange' }}>
+    <AppBar
+      position="fixed"
+      sx={{
+        backgroundColor: 'orange',
+        top: 0,
+        left: 0,
+        right: 0,
+      }}
+    >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
 
           {/* Desktop Logo */}
           <DeckIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
           <Typography
+            component={RouterLink}
+            to="/"
             variant="h6"
             noWrap
             sx={{
@@ -89,9 +123,14 @@ const AppHeader = () => {
               }}
             >
               {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
+                <MenuItem
+                  key={page.label}
+                  component={RouterLink}
+                  to={page.path}
+                  onClick={handleCloseNavMenu}
+                >
                   <Typography sx={{ textAlign: 'left' }}>
-                    {page}
+                    {page.label}
                   </Typography>
                 </MenuItem>
               ))}
@@ -101,6 +140,8 @@ const AppHeader = () => {
           {/* Mobile Logo */}
           <DeckIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
           <Typography
+            component={RouterLink}
+            to="/"
             variant="h5"
             noWrap
             sx={{
@@ -121,7 +162,9 @@ const AppHeader = () => {
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) => (
               <Button
-                key={page}
+                key={page.label}
+                component={RouterLink}
+                to={page.path}
                 onClick={handleCloseNavMenu}
                 sx={{
                   my: 2,
@@ -131,44 +174,43 @@ const AppHeader = () => {
                   px: 3,              // 📌 wider spacing
                 }}
               >
-                {page}
+                {page.label}
               </Button>
             ))}
           </Box>
 
           {/* User Avatar Menu */}
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <ShoppingCartIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1, color: 'white' }} />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Tooltip title="View cart">
+              <IconButton component={RouterLink} to="/cart" color="inherit">
+                <Badge badgeContent={cartCount} color="error">
+                  <ShoppingCartIcon sx={{ color: "white" }} />
+                </Badge>
+              </IconButton>
             </Tooltip>
 
-            <Menu
-              sx={{ mt: '45px' }}
-              anchorEl={anchorElUser}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-              PaperProps={{
-                sx: {
-                  width: '220px',   // 📌 wider user menu
-                  backgroundColor: '#111',
-                  color: 'white',
-                },
-              }}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
+            <Button
+              component={RouterLink}
+              to="/account"
+              sx={{ color: "white", display: { xs: "none", md: "inline-flex" } }}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography>{setting}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
+              {isAuthenticated ? user?.fullName?.split(" ")[0] || "Account" : "Account"}
+            </Button>
+
+            {isAuthenticated && (
+              <Button
+                variant="outlined"
+                onClick={handleLogout}
+                sx={{
+                  color: "white",
+                  borderColor: "rgba(255,255,255,0.55)",
+                  display: { xs: "none", md: "inline-flex" },
+                  "&:hover": { borderColor: "white" }
+                }}
+              >
+                Logout
+              </Button>
+            )}
           </Box>
 
         </Toolbar>

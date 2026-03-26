@@ -20,7 +20,7 @@ const theme = createTheme({
   },
 
   shape: {
-    borderRadius: 14,
+    borderRadius: 3,
   },
 
   typography: {
@@ -75,6 +75,22 @@ const theme = createTheme({
           "&:hover": {
             borderColor: Colors.primaryHover || Colors.primary,
           },
+        },
+      },
+    },
+
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 3,
+        },
+      },
+    },
+
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          borderRadius: 3,
         },
       },
     },
