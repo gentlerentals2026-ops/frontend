@@ -1,4 +1,5 @@
 import { API } from "../../constant/apiConstant";
+import { getErrorMessage, parseJsonSafely } from "../../utils/http";
 
 export const QuotationService = {
   createQuotation: async (payload) => {
@@ -11,10 +12,10 @@ export const QuotationService = {
       body: JSON.stringify(payload)
     });
 
-    const json = await response.json();
+    const json = await parseJsonSafely(response);
 
     if (!response.ok) {
-      throw new Error(json.message || "Unable to create quotation");
+      throw new Error(getErrorMessage(response, json, "Unable to create quotation"));
     }
 
     return json;

@@ -1,4 +1,5 @@
 import { API } from "../../constant/apiConstant";
+import { getErrorMessage, parseJsonSafely } from "../../utils/http";
 
 export const AccountService = {
   register: async (user) => {
@@ -12,10 +13,10 @@ export const AccountService = {
         body: JSON.stringify(user)
       });
 
-      const json = await response.json();
+      const json = await parseJsonSafely(response);
 
       if (!response.ok) {
-        throw new Error(json.message || "Unable to create account");
+        throw new Error(getErrorMessage(response, json, "Unable to create account"));
       }
 
       return json;

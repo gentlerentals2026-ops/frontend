@@ -1,5 +1,5 @@
 import { API } from "../../constant/apiConstant";
-
+import { parseJsonSafely } from "../../utils/http";
 
 export const ResultService = {
 
@@ -11,7 +11,7 @@ export const ResultService = {
           "Content-Type": "application/json",
         },
       });
-    const json = await response.json();
+    const json = await parseJsonSafely(response);
     return json;
     } catch (error) {
       console.error("Error creating account:", error);

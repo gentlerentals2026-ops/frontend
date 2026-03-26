@@ -1,4 +1,5 @@
 import { API } from "../../constant/apiConstant";
+import { getErrorMessage, parseJsonSafely } from "../../utils/http";
 
 export const AuthService = {
   login: async (credentials) => {
@@ -12,10 +13,10 @@ export const AuthService = {
         body: JSON.stringify(credentials)
       });
 
-      const json = await response.json();
+      const json = await parseJsonSafely(response);
 
       if (!response.ok) {
-        throw new Error(json.message || "Unable to login");
+        throw new Error(getErrorMessage(response, json, "Unable to login"));
       }
 
       return json;
@@ -35,10 +36,10 @@ export const AuthService = {
         }
       });
 
-      const json = await response.json();
+      const json = await parseJsonSafely(response);
 
       if (!response.ok) {
-        throw new Error(json.message || "Unable to logout");
+        throw new Error(getErrorMessage(response, json, "Unable to logout"));
       }
 
       return json;
@@ -58,10 +59,10 @@ export const AuthService = {
         }
       });
 
-      const json = await response.json();
+      const json = await parseJsonSafely(response);
 
       if (!response.ok) {
-        throw new Error(json.message || "Unable to fetch profile");
+        throw new Error(getErrorMessage(response, json, "Unable to fetch profile"));
       }
 
       return json;

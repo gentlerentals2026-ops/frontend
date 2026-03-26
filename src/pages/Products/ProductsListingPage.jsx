@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Card, CardContent, CardMedia, Chip, Grid, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Card, CardContent, CardMedia, Chip, Grid, Rating, Stack, Typography } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -114,8 +114,19 @@ const ProductsListingPage = () => {
                   ₦{formatPrice(product.price)}
                 </Typography>
 
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Rating value={Number(product.averageRating || 0)} precision={0.5} readOnly size="small" />
+                  <Typography sx={{ color: "text.secondary", fontSize: "0.9rem" }}>
+                    {product.reviewCount || 0} reviews
+                  </Typography>
+                </Stack>
+
                 <Typography sx={{ color: "text.secondary", fontSize: "0.95rem" }}>
                   Available units: {product.quantityAvailable}
+                </Typography>
+
+                <Typography sx={{ color: product.availabilityStatus === "In stock" ? "success.main" : "error.main", fontSize: "0.95rem", fontWeight: 600 }}>
+                  {product.availabilityStatus || "Availability pending"}
                 </Typography>
 
                 <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25} sx={{ mt: "auto" }}>
@@ -131,13 +142,17 @@ const ProductsListingPage = () => {
                     variant="contained"
                     fullWidth
                     onClick={() => handleAddToCart(product)}
-                    disabled={isAdding}
+                    disabled={isAdding || product.availabilityStatus !== "In stock"}
                     sx={{
                       backgroundColor: "orange",
                       "&:hover": { backgroundColor: "#f59e0b" }
                     }}
                   >
-                    {isAuthenticated ? "Add to Cart" : "Login to Add"}
+                    {product.availabilityStatus !== "In stock"
+                      ? "Unavailable"
+                      : isAuthenticated
+                        ? "Add to Cart"
+                        : "Login to Add"}
                   </Button>
                 </Stack>
               </CardContent>

@@ -1,4 +1,5 @@
 import { API } from "../../constant/apiConstant";
+import { getErrorMessage, parseJsonSafely } from "../../utils/http";
 
 export const ProductService = {
   getProducts: async () => {
@@ -11,11 +12,12 @@ export const ProductService = {
         }
       });
 
+      const json = await parseJsonSafely(response);
+
       if (!response.ok) {
-        throw new Error(`Failed to fetch products from ${endpoint}`);
+        throw new Error(getErrorMessage(response, json, `Failed to fetch products from ${endpoint}`));
       }
 
-      const json = await response.json();
       return json;
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -32,12 +34,12 @@ export const ProductService = {
           "Content-Type": "application/json"
         }
       });
+      const json = await parseJsonSafely(response);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch product from ${endpoint}`);
+        throw new Error(getErrorMessage(response, json, `Failed to fetch product from ${endpoint}`));
       }
 
-      const json = await response.json();
       return json;
     } catch (error) {
       console.error("Error fetching product:", error);

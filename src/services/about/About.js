@@ -1,4 +1,5 @@
 import { API } from "../../constant/apiConstant";
+import { getErrorMessage, parseJsonSafely } from "../../utils/http";
 
 export const AboutService = {
   getAbout: async () => {
@@ -9,10 +10,10 @@ export const AboutService = {
       }
     });
 
-    const json = await response.json();
+    const json = await parseJsonSafely(response);
 
     if (!response.ok) {
-      throw new Error(json.message || "Unable to fetch about content");
+      throw new Error(getErrorMessage(response, json, "Unable to fetch about content"));
     }
 
     return json;
@@ -28,10 +29,10 @@ export const AboutService = {
       body: JSON.stringify(payload)
     });
 
-    const json = await response.json();
+    const json = await parseJsonSafely(response);
 
     if (!response.ok) {
-      throw new Error(json.message || "Unable to update about content");
+      throw new Error(getErrorMessage(response, json, "Unable to update about content"));
     }
 
     return json;
