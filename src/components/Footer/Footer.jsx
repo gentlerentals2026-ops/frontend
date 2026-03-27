@@ -1,10 +1,18 @@
 import React from "react";
 import { Box, Grid, Typography, TextField, Button, IconButton } from "@mui/material";
 import { Facebook, Instagram, Twitter, MusicNote } from "@mui/icons-material";
+import { Link as RouterLink } from "react-router-dom";
 import { useSiteSettings } from "../../context/SiteSettingsContext";
 
 const Footer = () => {
   const { siteSettings } = useSiteSettings();
+  const socialLinks = [
+    { key: "facebook", url: siteSettings.facebookUrl, icon: <Facebook /> },
+    { key: "instagram", url: siteSettings.instagramUrl, icon: <Instagram /> },
+    { key: "twitter", url: siteSettings.twitterUrl, icon: <Twitter /> },
+    { key: "tiktok", url: siteSettings.tiktokUrl, icon: <MusicNote /> }
+  ];
+
   return (
     <Box sx={{ backgroundColor: "#000", color: "#bfc3d0", padding: "50px 20px 20px" }}>
       <Grid
@@ -39,10 +47,10 @@ const Footer = () => {
           <Typography variant="h6" sx={{ color: "#fff", mb: 2 }}>
             Useful Link
           </Typography>
-          <Typography sx={{ mb: 1 }}>Home</Typography>
-          <Typography sx={{ mb: 1 }}>About Us</Typography>
-          <Typography sx={{ mb: 1 }}>Contact Us</Typography>
-          <Typography sx={{ mb: 1 }}>Equipments</Typography>
+          <Typography component={RouterLink} to="/" sx={{ mb: 1, display: "block", color: "inherit", textDecoration: "none" }}>Home</Typography>
+          <Typography component={RouterLink} to="/about" sx={{ mb: 1, display: "block", color: "inherit", textDecoration: "none" }}>About Us</Typography>
+          <Typography component={RouterLink} to="/contact" sx={{ mb: 1, display: "block", color: "inherit", textDecoration: "none" }}>Contact Us</Typography>
+          <Typography component={RouterLink} to="/products" sx={{ mb: 1, display: "block", color: "inherit", textDecoration: "none" }}>Equipments</Typography>
         </Grid>
 
         {/* COMMUNITY */}
@@ -50,10 +58,10 @@ const Footer = () => {
           <Typography variant="h6" sx={{ color: "#fff", mb: 2 }}>
             Community
           </Typography>
-          <Typography sx={{ mb: 1 }}>FAQS</Typography>
-          <Typography sx={{ mb: 1 }}>Privacy Policy</Typography>
-          <Typography sx={{ mb: 1 }}>Cancellation Policy</Typography>
-          <Typography sx={{ mb: 1 }}>Brochure</Typography>
+          <Typography component={RouterLink} to="/faqs" sx={{ mb: 1, display: "block", color: "inherit", textDecoration: "none" }}>FAQS</Typography>
+          <Typography component={RouterLink} to="/privacy-policy" sx={{ mb: 1, display: "block", color: "inherit", textDecoration: "none" }}>Privacy Policy</Typography>
+          <Typography component={RouterLink} to="/cancellation-policy" sx={{ mb: 1, display: "block", color: "inherit", textDecoration: "none" }}>Cancellation Policy</Typography>
+          <Typography component={RouterLink} to="/brochure" sx={{ mb: 1, display: "block", color: "inherit", textDecoration: "none" }}>Brochure</Typography>
         </Grid>
 
         {/* NEWSLETTER */}
@@ -108,18 +116,19 @@ const Footer = () => {
 
           {/* SOCIAL ICONS */}
           <Box sx={{ display: "flex", gap: 2 }}>
-            <IconButton sx={{ color: "#bfc3d0" }}>
-              <Facebook />
-            </IconButton>
-            <IconButton sx={{ color: "#bfc3d0" }}>
-              <Instagram />
-            </IconButton>
-            <IconButton sx={{ color: "#bfc3d0" }}>
-              <Twitter />
-            </IconButton>
-            <IconButton sx={{ color: "#bfc3d0" }}>
-              <MusicNote />
-            </IconButton>
+            {socialLinks.map((item) => (
+              <IconButton
+                key={item.key}
+                component={item.url ? "a" : "button"}
+                href={item.url || undefined}
+                target={item.url ? "_blank" : undefined}
+                rel={item.url ? "noreferrer" : undefined}
+                disabled={!item.url}
+                sx={{ color: "#bfc3d0" }}
+              >
+                {item.icon}
+              </IconButton>
+            ))}
           </Box>
         </Grid>
       </Grid>

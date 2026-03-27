@@ -10,6 +10,8 @@ import AccountPage from "./pages/Account/AccountPage";
 import CartPage from "./pages/Cart/CartPage";
 import AboutPage from "./pages/About/AboutPage";
 import ContactPage from "./pages/Contact/ContactPage";
+import FaqPage from "./pages/Info/FaqPage";
+import PolicyPage from "./pages/Info/PolicyPage";
 const  App = ()=> {
 
   
@@ -27,6 +29,10 @@ const  App = ()=> {
           <Route path="/account" element={<AccountPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/faqs" element={<FaqPage />} />
+          <Route path="/privacy-policy" element={<PolicyPage type="privacy" />} />
+          <Route path="/cancellation-policy" element={<PolicyPage type="cancellation" />} />
+          <Route path="/brochure" element={<PolicyPage type="brochure" />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/products" element={<ProductsListingPage />} />
           <Route path="/products/:slug" element={<ProductDetailsPage />} />
