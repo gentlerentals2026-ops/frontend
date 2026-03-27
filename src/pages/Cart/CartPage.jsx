@@ -25,6 +25,7 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { QuotationService } from "../../services/quotation/Quotation";
 import { jsPDF } from "jspdf";
+import { useSiteSettings } from "../../context/SiteSettingsContext";
 import {
   useClearCartMutation,
   useGetCartQuery,
@@ -37,6 +38,7 @@ const formatPrice = (price) => Number(price || 0).toLocaleString("en-NG");
 const CartPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useSelector((state) => state.appState);
+  const { siteSettings } = useSiteSettings();
   const { data: cartResponse, isLoading: isLoadingCart } = useGetCartQuery(undefined, { skip: !isAuthenticated });
   const [updateCartItem] = useUpdateCartItemMutation();
   const [removeCartItem] = useRemoveCartItemMutation();
@@ -261,7 +263,12 @@ const CartPage = () => {
                   <Button
                     component={RouterLink}
                     to={`/products/${item.slug}`}
-                    sx={{ mt: 2, px: 0, color: "#d97706" }}
+                    variant="contained"
+                    sx={{
+                      mt: 2,
+                      backgroundColor: siteSettings.addToCartColor,
+                      "&:hover": { backgroundColor: siteSettings.addToCartColor }
+                    }}
                   >
                     View Listing
                   </Button>

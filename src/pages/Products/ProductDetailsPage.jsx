@@ -367,7 +367,15 @@ const ProductDetailsPage = () => {
                   <Typography sx={{ color: "#d97706", fontWeight: 800, mb: 1 }}>
                     ₦{formatPrice(item.price)}
                   </Typography>
-                  <Button component={RouterLink} to={`/products/${item.slug}`} variant="outlined">
+                  <Button
+                    component={RouterLink}
+                    to={`/products/${item.slug}`}
+                    variant="contained"
+                    sx={{
+                      backgroundColor: siteSettings.addToCartColor,
+                      "&:hover": { backgroundColor: siteSettings.addToCartColor }
+                    }}
+                  >
                     View Listing
                   </Button>
                 </Paper>

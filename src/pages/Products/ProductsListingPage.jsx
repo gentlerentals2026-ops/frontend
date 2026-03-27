@@ -169,8 +169,12 @@ const ProductsListingPage = () => {
                   <Button
                     component={RouterLink}
                     to={`/products/${product.slug}`}
-                    variant="outlined"
+                    variant="contained"
                     fullWidth
+                    sx={{
+                      backgroundColor: siteSettings.addToCartColor,
+                      "&:hover": { backgroundColor: siteSettings.addToCartColor }
+                    }}
                   >
                     View Listing
                   </Button>

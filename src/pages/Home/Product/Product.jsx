@@ -2,10 +2,12 @@ import { Box, Grid, Card, CardMedia, CardContent, Typography, Button, Skeleton }
 import { Link as RouterLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ProductService } from "../../../services/products/Product";
+import { useSiteSettings } from "../../../context/SiteSettingsContext";
 
 const skeletonItems = Array.from({ length: 8 }, (_, index) => index);
 
 export default function ProductPage() {
+  const { siteSettings } = useSiteSettings();
   const [showAll, setShowAll] = useState(false);
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -133,11 +135,11 @@ export default function ProductPage() {
                 variant="contained"
                 fullWidth
                 sx={{
-                  backgroundColor: "orange",
+                  backgroundColor: siteSettings.addToCartColor,
                   color: "white",
                   borderRadius: 0,
                   py: 1.3,
-                  "&:hover": { backgroundColor: "#ff9800" },
+                  "&:hover": { backgroundColor: siteSettings.addToCartColor },
                 }}
               >
                 View Listing
