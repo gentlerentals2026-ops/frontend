@@ -13,12 +13,15 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import DeckIcon from '@mui/icons-material/Deck';
+import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
 import { Link as RouterLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AuthService } from "../../services/auth/Auth";
 import { setAccessToken, setIsAuthenticated, setUser } from "../../Redux/Reducers/appState";
 import { cartApi, useGetCartQuery } from "../../services/api/cartApi";
 import { useSiteSettings } from "../../context/SiteSettingsContext";
+import { ProductService } from "../../services/products/Product";
+import { downloadBrochurePdf } from "../../utils/brochure";
 
 const pages = [
   { label: "HOME", path: "/" },
@@ -34,6 +37,7 @@ const AppHeader = () => {
   const { isAuthenticated, user } = useSelector((state) => state.appState);
   const { siteSettings } = useSiteSettings();
   const [anchorElNav, setAnchorElNav] = React.useState(null);
+  const [isPreparingBrochure, setIsPreparingBrochure] = React.useState(false);
   const { data: cartResponse } = useGetCartQuery(undefined, { skip: !isAuthenticated });
   const items = cartResponse?.data?.items || [];
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -59,6 +63,25 @@ const AppHeader = () => {
     }
   };
 
+  const handleDownloadBrochure = async () => {
+    try {
+      setIsPreparingBrochure(true);
+      const response = await ProductService.getProducts();
+      downloadBrochurePdf({
+        siteSettings,
+        products: response?.data || []
+      });
+    } catch (error) {
+      console.error("Unable to prepare brochure:", error);
+      downloadBrochurePdf({
+        siteSettings,
+        products: []
+      });
+    } finally {
+      setIsPreparingBrochure(false);
+    }
+  };
+
   return (
     <AppBar
       position="fixed"
@@ -69,6 +92,50 @@ const AppHeader = () => {
         right: 0,
       }}
     >
+      <Box
+        sx={{
+          borderBottom: "1px solid rgba(255,255,255,0.18)",
+          backgroundColor: "rgba(0,0,0,0.14)"
+        }}
+      >
+        <Container maxWidth="xl">
+          <Box
+            sx={{
+              minHeight: 40,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 2,
+              py: 0.75,
+              flexWrap: "wrap"
+            }}
+          >
+            <Typography sx={{ color: "white", fontSize: { xs: "0.82rem", md: "0.92rem" }, fontWeight: 600 }}>
+              Download our brochure for a quick look at our rental collection.
+            </Typography>
+            <Button
+              startIcon={<DownloadRoundedIcon />}
+              variant="contained"
+              size="small"
+              onClick={handleDownloadBrochure}
+              disabled={isPreparingBrochure}
+              sx={{
+                backgroundColor: "white",
+                color: siteSettings.topBarColor,
+                px: 2,
+                fontWeight: 700,
+                whiteSpace: "nowrap",
+                "&:hover": {
+                  backgroundColor: "rgba(255,255,255,0.92)"
+                }
+              }}
+            >
+              {isPreparingBrochure ? "Preparing Brochure..." : "Download Our Brochure"}
+            </Button>
+          </Box>
+        </Container>
+      </Box>
+
       <Container maxWidth="xl">
         <Toolbar disableGutters>
 

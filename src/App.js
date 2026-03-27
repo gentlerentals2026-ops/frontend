@@ -17,7 +17,7 @@ const  App = ()=> {
   return (
     <div>
       <AppHeader />
-      <Toolbar />
+      <Toolbar sx={{ minHeight: { xs: 104, md: 112 } }} />
       <Box
  
       >
