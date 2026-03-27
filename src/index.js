@@ -9,6 +9,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { BrowserRouter } from "react-router-dom";
 import theme from "./theme";
+import { SiteSettingsProvider } from "./context/SiteSettingsContext";
 const persistor = persistStore(store)
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -18,9 +19,11 @@ root.render(
   <PersistGate loading={null} persistor={persistor}>
   <ThemeProvider theme={theme}>
     <CssBaseline />
-    <BrowserRouter>
-          <App />
-    </BrowserRouter>
+    <SiteSettingsProvider>
+      <BrowserRouter>
+            <App />
+      </BrowserRouter>
+    </SiteSettingsProvider>
   </ThemeProvider>
    </PersistGate>
   </Provider>,

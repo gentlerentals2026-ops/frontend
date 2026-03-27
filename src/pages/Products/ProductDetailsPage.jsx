@@ -16,12 +16,14 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { ProductService } from "../../services/products/Product";
 import { useAddToCartMutation } from "../../services/api/cartApi";
+import { useSiteSettings } from "../../context/SiteSettingsContext";
 
 const formatPrice = (price) => Number(price || 0).toLocaleString("en-NG");
 
 const ProductDetailsPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useSelector((state) => state.appState);
+  const { siteSettings } = useSiteSettings();
   const [addToCart, { isLoading: isAdding }] = useAddToCartMutation();
   const { slug } = useParams();
   const [product, setProduct] = useState(null);
@@ -263,8 +265,8 @@ const ProductDetailsPage = () => {
                   disabled={isAdding || !isAvailable}
                   sx={{
                     width: { xs: "100%", sm: "fit-content" },
-                    backgroundColor: "orange",
-                    "&:hover": { backgroundColor: "#f59e0b" }
+                    backgroundColor: siteSettings.addToCartColor,
+                    "&:hover": { backgroundColor: siteSettings.addToCartColor }
                   }}
                 >
                   {!isAvailable ? "Unavailable" : isAuthenticated ? "Add to Cart" : "Login to Add"}

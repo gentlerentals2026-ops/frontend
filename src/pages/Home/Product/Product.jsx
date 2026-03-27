@@ -1,7 +1,9 @@
-import { Box, Grid, Card, CardMedia, CardContent, Typography, Button } from "@mui/material";
+import { Box, Grid, Card, CardMedia, CardContent, Typography, Button, Skeleton } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ProductService } from "../../../services/products/Product";
+
+const skeletonItems = Array.from({ length: 8 }, (_, index) => index);
 
 export default function ProductPage() {
   const [showAll, setShowAll] = useState(false);
@@ -39,12 +41,6 @@ export default function ProductPage() {
         Chairs & Tables For Rent
       </Typography>
 
-      {isLoading && (
-        <Typography sx={{ textAlign: "center", mb: 3, color: "gray" }}>
-          Loading rental items...
-        </Typography>
-      )}
-
       {!isLoading && error && (
         <Typography sx={{ textAlign: "center", mb: 3, color: "error.main" }}>
           {error}
@@ -58,6 +54,36 @@ export default function ProductPage() {
       )}
 
       <Grid container spacing={3} justifyContent="center">
+        {isLoading &&
+          skeletonItems.map((item) => (
+            <Grid
+              item
+              key={`home-skeleton-${item}`}
+              xs={6}
+              md={4}
+              lg={3}
+              sx={{ display: "flex", justifyContent: "center" }}
+            >
+              <Card
+                sx={{
+                  width: 350,
+                  height: 380,
+                  borderRadius: 3,
+                  boxShadow: 3,
+                  display: "flex",
+                  flexDirection: "column"
+                }}
+              >
+                <Skeleton variant="rectangular" sx={{ height: 200 }} />
+                <CardContent sx={{ textAlign: "center", minHeight: 80 }}>
+                  <Skeleton variant="text" sx={{ fontSize: "1.2rem", mx: "auto", width: "72%" }} />
+                  <Skeleton variant="text" sx={{ fontSize: "1rem", mx: "auto", width: "38%" }} />
+                </CardContent>
+                <Skeleton variant="rectangular" sx={{ mt: "auto", height: 49, borderRadius: 0 }} />
+              </Card>
+            </Grid>
+          ))}
+
         {displayedProducts.map((item) => (
           <Grid
             item

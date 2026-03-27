@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AuthService } from "../../services/auth/Auth";
 import { setAccessToken, setIsAuthenticated, setUser } from "../../Redux/Reducers/appState";
 import { cartApi, useGetCartQuery } from "../../services/api/cartApi";
+import { useSiteSettings } from "../../context/SiteSettingsContext";
 
 const pages = [
   { label: "HOME", path: "/" },
@@ -31,6 +32,7 @@ const pages = [
 const AppHeader = () => {
   const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector((state) => state.appState);
+  const { siteSettings } = useSiteSettings();
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const { data: cartResponse } = useGetCartQuery(undefined, { skip: !isAuthenticated });
   const items = cartResponse?.data?.items || [];
@@ -61,7 +63,7 @@ const AppHeader = () => {
     <AppBar
       position="fixed"
       sx={{
-        backgroundColor: 'orange',
+        backgroundColor: siteSettings.topBarColor,
         top: 0,
         left: 0,
         right: 0,
@@ -71,24 +73,36 @@ const AppHeader = () => {
         <Toolbar disableGutters>
 
           {/* Desktop Logo */}
-          <DeckIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
-          <Typography
-            component={RouterLink}
-            to="/"
-            variant="h6"
-            noWrap
-            sx={{
-              mr: 4,
-              display: { xs: 'none', md: 'flex' },
-              fontFamily: 'Montserrat',
-              fontWeight: 700,
-              letterSpacing: '.2rem',
-              color: 'white',
-              textDecoration: 'none',
-            }}
-          >
-            G-Rentals
-          </Typography>
+          {siteSettings.logoUrl ? (
+            <Box
+              component={RouterLink}
+              to="/"
+              sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", mr: 3 }}
+            >
+              <Box component="img" src={siteSettings.logoUrl} alt={siteSettings.siteName} sx={{ height: 42, width: "auto" }} />
+            </Box>
+          ) : (
+            <>
+              <DeckIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+              <Typography
+                component={RouterLink}
+                to="/"
+                variant="h6"
+                noWrap
+                sx={{
+                  mr: 4,
+                  display: { xs: 'none', md: 'flex' },
+                  fontFamily: 'Montserrat',
+                  fontWeight: 700,
+                  letterSpacing: '.2rem',
+                  color: 'white',
+                  textDecoration: 'none',
+                }}
+              >
+                {siteSettings.siteName || "G-Rentals"}
+              </Typography>
+            </>
+          )}
 
           {/* Mobile Hamburger Menu */}
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -138,25 +152,37 @@ const AppHeader = () => {
           </Box>
 
           {/* Mobile Logo */}
-          <DeckIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
-          <Typography
-            component={RouterLink}
-            to="/"
-            variant="h5"
-            noWrap
-            sx={{
-              mr: 2,
-              display: { xs: 'flex', md: 'none' },
-              flexGrow: 1,
-              fontFamily: 'Montserrat',
-              fontWeight: 700,
-              letterSpacing: '.2rem',
-              color: 'white',
-              textDecoration: 'none',
-            }}
-          >
-           G-RENTALS
-          </Typography>
+          {siteSettings.logoUrl ? (
+            <Box
+              component={RouterLink}
+              to="/"
+              sx={{ display: { xs: "flex", md: "none" }, alignItems: "center", flexGrow: 1 }}
+            >
+              <Box component="img" src={siteSettings.logoUrl} alt={siteSettings.siteName} sx={{ height: 36, width: "auto" }} />
+            </Box>
+          ) : (
+            <>
+              <DeckIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
+              <Typography
+                component={RouterLink}
+                to="/"
+                variant="h5"
+                noWrap
+                sx={{
+                  mr: 2,
+                  display: { xs: 'flex', md: 'none' },
+                  flexGrow: 1,
+                  fontFamily: 'Montserrat',
+                  fontWeight: 700,
+                  letterSpacing: '.2rem',
+                  color: 'white',
+                  textDecoration: 'none',
+                }}
+              >
+               {siteSettings.siteName?.toUpperCase() || "G-RENTALS"}
+              </Typography>
+            </>
+          )}
 
           {/* Desktop Menu Items */}
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>

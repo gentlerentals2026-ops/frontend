@@ -1,32 +1,32 @@
 import { Box, Typography, Button } from "@mui/material";
 import { useState, useEffect } from "react";
+import { useSiteSettings } from "../../context/SiteSettingsContext";
 
 export default function Slider() {
-  // List of background images
-  const images = [
-    "https://plus.unsplash.com/premium_photo-1679280550151-4c56e920b277?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDY5fHx8ZW58MHx8fHx8",
-    "https://images.unsplash.com/photo-1722768331920-eeedb2e1c73f?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDkxfHx8ZW58MHx8fHx8",
-    "https://images.unsplash.com/photo-1714520270545-937450f41506?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    "https://images.unsplash.com/photo-1754407189758-fde7fb4394ad?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fHw%3D",
-  ];
+  const { siteSettings } = useSiteSettings();
+  const images = siteSettings.sliderImages?.length ? siteSettings.sliderImages : [];
 
   const [index, setIndex] = useState(0);
 
   // Auto change background every 3 seconds
   useEffect(() => {
+    if (images.length <= 1) {
+      return undefined;
+    }
+
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % images.length);
-    }, 3000);
+    }, Number(siteSettings.sliderSpeed) || 3000);
 
     return () => clearInterval(interval);
-  });
+  }, [images, siteSettings.sliderSpeed]);
 
   return (
     <Box
       sx={{
         width: "100%",
         height: { xs: "80vh", md: "100vh" },
-        backgroundImage: `url(${images[index]})`,
+        backgroundImage: `url(${images[index] || ""})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         transition: "background-image 1s ease-in-out",  // smooth fade

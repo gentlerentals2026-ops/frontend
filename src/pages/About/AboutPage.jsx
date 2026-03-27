@@ -27,7 +27,7 @@ const defaultForm = {
 
 const AboutPage = () => {
   const { isAuthenticated, user } = useSelector((state) => state.appState);
-  const isAdmin = isAuthenticated && user?.role === "admin";
+  const isAdmin = isAuthenticated && ["admin", "super_admin"].includes(user?.role);
   const [about, setAbout] = useState(null);
   const [form, setForm] = useState(defaultForm);
   const [isLoading, setIsLoading] = useState(true);

@@ -1,8 +1,10 @@
 import React from "react";
 import { Box, Grid, Typography, TextField, Button, IconButton } from "@mui/material";
 import { Facebook, Instagram, Twitter, MusicNote } from "@mui/icons-material";
+import { useSiteSettings } from "../../context/SiteSettingsContext";
 
 const Footer = () => {
+  const { siteSettings } = useSiteSettings();
   return (
     <Box sx={{ backgroundColor: "#000", color: "#bfc3d0", padding: "50px 20px 20px" }}>
       <Grid
@@ -16,8 +18,8 @@ const Footer = () => {
         {/* LEFT SECTION - LOGO + CONTACT */}
         <Grid item xs={12} md={4}>
           <img
-            src="/logo.png"
-            alt="Posh Rentals Logo"
+            src={siteSettings.logoUrl || "/logo.png"}
+            alt={`${siteSettings.siteName || "Gentle Rentals"} Logo`}
             style={{ width: "140px", marginBottom: "10px" }}
           />
 
@@ -131,7 +133,7 @@ const Footer = () => {
           fontSize: "14px",
         }}
       >
-        ©2026 Gentle Rentals Ventures. All Rights Reserved.
+        ©2026 {siteSettings.siteName || "Gentle Rentals Ventures"}. All Rights Reserved.
       </Typography>
     </Box>
   );
