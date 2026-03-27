@@ -64,6 +64,11 @@ const AppHeader = () => {
   };
 
   const handleDownloadBrochure = async () => {
+    if (siteSettings.brochureUrl) {
+      window.open(siteSettings.brochureUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
+
     try {
       setIsPreparingBrochure(true);
       const response = await ProductService.getProducts();
