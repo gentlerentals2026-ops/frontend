@@ -1,4 +1,6 @@
-import { Alert, Box, Button, Card, CardContent, Chip, Grid, Rating, Skeleton, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Card, CardContent, Chip, Grid, IconButton, Rating, Skeleton, Stack, Typography } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -18,6 +20,7 @@ const ProductsListingPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [cartMessage, setCartMessage] = useState("");
+  const [selectedQuantities, setSelectedQuantities] = useState({});
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -36,13 +39,22 @@ const ProductsListingPage = () => {
     loadProducts();
   }, []);
 
+  const handleQuantityChange = (productId, nextQuantity, maxQuantity) => {
+    setSelectedQuantities((current) => ({
+      ...current,
+      [productId]: Math.max(1, Math.min(nextQuantity, Number(maxQuantity) || 1))
+    }));
+  };
+
+  const getSelectedQuantity = (product) => selectedQuantities[product._id] || 1;
+
   const handleAddToCart = (product) => {
     if (!isAuthenticated) {
       navigate("/account");
       return;
     }
 
-    addToCart({ productId: product._id })
+    addToCart({ productId: product._id, quantity: getSelectedQuantity(product) })
       .unwrap()
       .then(() => setCartMessage(`${product.title} added to cart.`))
       .catch((cartError) => setCartMessage(cartError?.data?.message || "Unable to add product to cart."));
@@ -164,6 +176,45 @@ const ProductsListingPage = () => {
                 <Typography sx={{ color: product.availabilityStatus === "In stock" ? "success.main" : "error.main", fontSize: "0.95rem", fontWeight: 600 }}>
                   {product.availabilityStatus || "Availability pending"}
                 </Typography>
+
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, mt: 0.5 }}>
+                  <Typography sx={{ color: "text.secondary", fontSize: "0.95rem" }}>
+                    Quantity
+                  </Typography>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleQuantityChange(product._id, getSelectedQuantity(product) - 1, product.quantityAvailable)}
+                      disabled={getSelectedQuantity(product) <= 1}
+                      sx={{
+                        color: "#111827",
+                        border: "1px solid rgba(17, 24, 39, 0.22)",
+                        backgroundColor: "#ffffff",
+                        "&:hover": { backgroundColor: "#f3f4f6" },
+                        "&.Mui-disabled": { color: "rgba(17, 24, 39, 0.35)" }
+                      }}
+                    >
+                      <RemoveIcon fontSize="small" />
+                    </IconButton>
+                    <Typography sx={{ minWidth: 24, textAlign: "center", fontWeight: 700 }}>
+                      {getSelectedQuantity(product)}
+                    </Typography>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleQuantityChange(product._id, getSelectedQuantity(product) + 1, product.quantityAvailable)}
+                      disabled={getSelectedQuantity(product) >= Number(product.quantityAvailable || 1)}
+                      sx={{
+                        color: "#111827",
+                        border: "1px solid rgba(17, 24, 39, 0.22)",
+                        backgroundColor: "#ffffff",
+                        "&:hover": { backgroundColor: "#f3f4f6" },
+                        "&.Mui-disabled": { color: "rgba(17, 24, 39, 0.35)" }
+                      }}
+                    >
+                      <AddIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </Box>
 
                 <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25} sx={{ mt: "auto" }}>
                   <Button

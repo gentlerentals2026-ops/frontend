@@ -6,11 +6,14 @@ import {
   Chip,
   Divider,
   Grid,
+  IconButton,
   Paper,
   Rating,
   Stack,
   Typography
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -32,6 +35,7 @@ const ProductDetailsPage = () => {
   const [error, setError] = useState("");
   const [cartMessage, setCartMessage] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -42,6 +46,7 @@ const ProductDetailsPage = () => {
         const productData = response.data || null;
         setProduct(productData);
         setSelectedImage(productData?.imageUrl || productData?.images?.[0] || "");
+        setSelectedQuantity(1);
 
         const listingResponse = await ProductService.getProducts();
         const related = (listingResponse.data || [])
@@ -64,7 +69,7 @@ const ProductDetailsPage = () => {
       return;
     }
 
-    addToCart({ productId: product._id })
+    addToCart({ productId: product._id, quantity: selectedQuantity })
       .unwrap()
       .then(() => setCartMessage(`${product.title} added to cart.`))
       .catch((cartError) => setCartMessage(cartError?.data?.message || "Unable to add product to cart."));
@@ -259,6 +264,45 @@ const ProductDetailsPage = () => {
               </Grid>
 
               <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ mt: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    border: "1px solid rgba(148, 163, 184, 0.35)",
+                    borderRadius: 2,
+                    px: 1,
+                    minWidth: { xs: "100%", sm: 150 }
+                  }}
+                >
+                  <IconButton
+                    onClick={() => setSelectedQuantity((current) => Math.max(1, current - 1))}
+                    disabled={selectedQuantity <= 1}
+                    sx={{
+                      color: "#111827",
+                      border: "1px solid rgba(17, 24, 39, 0.22)",
+                      backgroundColor: "#ffffff",
+                      "&:hover": { backgroundColor: "#f3f4f6" },
+                      "&.Mui-disabled": { color: "rgba(17, 24, 39, 0.35)" }
+                    }}
+                  >
+                    <RemoveIcon />
+                  </IconButton>
+                  <Typography sx={{ fontWeight: 700 }}>{selectedQuantity}</Typography>
+                  <IconButton
+                    onClick={() => setSelectedQuantity((current) => Math.min(Number(product.quantityAvailable || 1), current + 1))}
+                    disabled={selectedQuantity >= Number(product.quantityAvailable || 1)}
+                    sx={{
+                      color: "#111827",
+                      border: "1px solid rgba(17, 24, 39, 0.22)",
+                      backgroundColor: "#ffffff",
+                      "&:hover": { backgroundColor: "#f3f4f6" },
+                      "&.Mui-disabled": { color: "rgba(17, 24, 39, 0.35)" }
+                    }}
+                  >
+                    <AddIcon />
+                  </IconButton>
+                </Box>
                 <Button
                   variant="contained"
                   onClick={handleAddToCart}

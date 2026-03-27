@@ -5,6 +5,7 @@ export const defaultSiteSettings = {
   logoUrl: "",
   topBarColor: "#f59e0b",
   addToCartColor: "#f59e0b",
+  footerBackgroundColor: "#000000",
   brochureUrl: "",
   brochurePublicId: "",
   facebookUrl: "",

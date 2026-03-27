@@ -14,7 +14,7 @@ const Footer = () => {
   ];
 
   return (
-    <Box sx={{ backgroundColor: "#000", color: "#bfc3d0", padding: "50px 20px 20px" }}>
+    <Box sx={{ backgroundColor: siteSettings.footerBackgroundColor || "#000000", color: "#bfc3d0", padding: "50px 20px 20px" }}>
       <Grid
         container
         spacing={4}
