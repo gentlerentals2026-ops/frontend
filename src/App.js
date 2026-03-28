@@ -13,12 +13,14 @@ import ContactPage from "./pages/Contact/ContactPage";
 import FaqPage from "./pages/Info/FaqPage";
 import PolicyPage from "./pages/Info/PolicyPage";
 import NotFoundPage from "./pages/NotFound/NotFoundPage";
+import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 const  App = ()=> {
 
   
 
   return (
     <div>
+      <ScrollToTop />
       <AppHeader />
       <Toolbar sx={{ minHeight: { xs: 104, md: 112 } }} />
       <Box

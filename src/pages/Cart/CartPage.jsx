@@ -51,6 +51,8 @@ const CartPage = () => {
     eventDate: "",
     rentalDays: 1,
     eventLocation: "",
+    emergencyContactName: "",
+    emergencyContactPhone: "",
     notes: ""
   });
 
@@ -87,6 +89,10 @@ const CartPage = () => {
     doc.text(`Return Date: ${quotation.returnDate || "Not specified"}`, 14, currentY);
     currentY += 7;
     doc.text(`Location: ${quoteForm.eventLocation || "Not specified"}`, 14, currentY);
+    currentY += 7;
+    doc.text(`Emergency Contact: ${quoteForm.emergencyContactName || "Not specified"}`, 14, currentY);
+    currentY += 7;
+    doc.text(`Emergency Phone: ${quoteForm.emergencyContactPhone || "Not specified"}`, 14, currentY);
     currentY += 10;
 
     doc.setFontSize(12);
@@ -127,6 +133,8 @@ const CartPage = () => {
         eventDate: quoteForm.eventDate,
         rentalDays: Number(quoteForm.rentalDays) || 1,
         eventLocation: quoteForm.eventLocation,
+        emergencyContactName: quoteForm.emergencyContactName,
+        emergencyContactPhone: quoteForm.emergencyContactPhone,
         notes: quoteForm.notes,
         items: items.map((item) => ({
           productId: item.productId,
@@ -423,6 +431,44 @@ const CartPage = () => {
               label="Event Location"
               name="eventLocation"
               value={quoteForm.eventLocation}
+              onChange={handleQuoteFormChange}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "#ffffff",
+                  color: "#111827"
+                },
+                "& .MuiInputLabel-root": {
+                  color: "#374151"
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: siteSettings.addToCartColor
+                }
+              }}
+              fullWidth
+            />
+            <TextField
+              label="Emergency Contact Name"
+              name="emergencyContactName"
+              value={quoteForm.emergencyContactName}
+              onChange={handleQuoteFormChange}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "#ffffff",
+                  color: "#111827"
+                },
+                "& .MuiInputLabel-root": {
+                  color: "#374151"
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: siteSettings.addToCartColor
+                }
+              }}
+              fullWidth
+            />
+            <TextField
+              label="Emergency Contact Phone"
+              name="emergencyContactPhone"
+              value={quoteForm.emergencyContactPhone}
               onChange={handleQuoteFormChange}
               sx={{
                 "& .MuiOutlinedInput-root": {
