@@ -37,7 +37,7 @@ const  App = ()=> {
           <Route path="/cart" element={<CartPage />} />
           <Route path="/products" element={<ProductsListingPage />} />
           <Route path="/products/:slug" element={<ProductDetailsPage />} />
-          <Route path="*" element={<NotFoundPage />} />
+          <Route path="*" element={<Home />} />
         </Routes>
       </Box>
       <WhatsAppFloat />
