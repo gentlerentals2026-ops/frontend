@@ -47,6 +47,7 @@ const CartPage = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const [quoteForm, setQuoteForm] = useState({
     eventDate: "",
     rentalDays: 1,
@@ -63,6 +64,10 @@ const CartPage = () => {
   const handleQuoteFormChange = (event) => {
     const { name, value } = event.target;
     setQuoteForm((current) => ({ ...current, [name]: value }));
+    setFieldErrors((current) => ({
+      ...current,
+      [name]: ""
+    }));
   };
 
   const generatePdf = (quotation) => {
@@ -124,10 +129,39 @@ const CartPage = () => {
   };
 
   const handleGenerateQuotation = async () => {
+    const nextFieldErrors = {};
+
+    if (!quoteForm.eventDate) {
+      nextFieldErrors.eventDate = "Event date is required.";
+    }
+
+    if (!Number.isFinite(Number(quoteForm.rentalDays)) || Number(quoteForm.rentalDays) < 1) {
+      nextFieldErrors.rentalDays = "Rental days must be at least 1.";
+    }
+
+    if (!quoteForm.eventLocation.trim()) {
+      nextFieldErrors.eventLocation = "Event location is required.";
+    }
+
+    if (!quoteForm.emergencyContactName.trim()) {
+      nextFieldErrors.emergencyContactName = "Emergency contact name is required.";
+    }
+
+    if (!quoteForm.emergencyContactPhone.trim()) {
+      nextFieldErrors.emergencyContactPhone = "Emergency contact phone is required.";
+    }
+
+    setFieldErrors(nextFieldErrors);
+
+    if (Object.keys(nextFieldErrors).length > 0) {
+      return;
+    }
+
     try {
       setIsGenerating(true);
       setError("");
       setSuccess("");
+      setFieldErrors({});
 
       const payload = {
         eventDate: quoteForm.eventDate,
@@ -149,6 +183,14 @@ const CartPage = () => {
       generatePdf(response.data);
       setSuccess("Quotation generated and sent to admin successfully.");
       setIsDialogOpen(false);
+      setQuoteForm({
+        eventDate: "",
+        rentalDays: 1,
+        eventLocation: "",
+        emergencyContactName: "",
+        emergencyContactPhone: "",
+        notes: ""
+      });
     } catch (quotationError) {
       setError(quotationError.message || "Unable to generate quotation.");
     } finally {
@@ -391,6 +433,9 @@ const CartPage = () => {
               type="date"
               value={quoteForm.eventDate}
               onChange={handleQuoteFormChange}
+              required
+              error={Boolean(fieldErrors.eventDate)}
+              helperText={fieldErrors.eventDate || " "}
               InputLabelProps={{ shrink: true }}
               sx={{
                 "& .MuiOutlinedInput-root": {
@@ -413,6 +458,9 @@ const CartPage = () => {
               value={quoteForm.rentalDays}
               onChange={handleQuoteFormChange}
               inputProps={{ min: 1 }}
+              required
+              error={Boolean(fieldErrors.rentalDays)}
+              helperText={fieldErrors.rentalDays || " "}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   backgroundColor: "#ffffff",
@@ -432,6 +480,9 @@ const CartPage = () => {
               name="eventLocation"
               value={quoteForm.eventLocation}
               onChange={handleQuoteFormChange}
+              required
+              error={Boolean(fieldErrors.eventLocation)}
+              helperText={fieldErrors.eventLocation || " "}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   backgroundColor: "#ffffff",
@@ -451,6 +502,9 @@ const CartPage = () => {
               name="emergencyContactName"
               value={quoteForm.emergencyContactName}
               onChange={handleQuoteFormChange}
+              required
+              error={Boolean(fieldErrors.emergencyContactName)}
+              helperText={fieldErrors.emergencyContactName || " "}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   backgroundColor: "#ffffff",
@@ -470,6 +524,9 @@ const CartPage = () => {
               name="emergencyContactPhone"
               value={quoteForm.emergencyContactPhone}
               onChange={handleQuoteFormChange}
+              required
+              error={Boolean(fieldErrors.emergencyContactPhone)}
+              helperText={fieldErrors.emergencyContactPhone || " "}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   backgroundColor: "#ffffff",
