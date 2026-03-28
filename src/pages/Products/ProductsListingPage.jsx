@@ -134,6 +134,7 @@ const ProductsListingPage = () => {
                 width: "100%",
                 maxWidth: 380,
                 height: "100%",
+                position: "relative",
                 borderRadius: 3,
                 overflow: "hidden",
                 boxShadow: "0 20px 45px rgba(15, 23, 42, 0.10)",
@@ -142,6 +143,25 @@ const ProductsListingPage = () => {
               }}
             >
               <Box component="img" src={product.imageUrl} alt={product.title} sx={{ height: 260, width: "100%", objectFit: "cover" }} />
+              {!!product.bookedQuantity && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 14,
+                    left: 14,
+                    right: 14,
+                    backgroundColor: "rgba(17, 24, 39, 0.78)",
+                    color: "#ffffff",
+                    px: 1.5,
+                    py: 1,
+                    borderRadius: 2,
+                    fontSize: "0.8rem",
+                    fontWeight: 600
+                  }}
+                >
+                  {product.availabilityMessage || `${product.bookedQuantity} booked/rented.`}
+                </Box>
+              )}
               <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column", gap: 1.5 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 1 }}>
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>
@@ -170,7 +190,7 @@ const ProductsListingPage = () => {
                 </Stack>
 
                 <Typography sx={{ color: "text.secondary", fontSize: "0.95rem" }}>
-                  Available units: {product.quantityAvailable}
+                  Available in stock: {product.availableQuantity ?? product.quantityAvailable}
                 </Typography>
 
                 <Typography sx={{ color: product.availabilityStatus === "In stock" ? "success.main" : "error.main", fontSize: "0.95rem", fontWeight: 600 }}>
@@ -204,12 +224,12 @@ const ProductsListingPage = () => {
                         handleQuantityChange(
                           product._id,
                           Number(event.target.value) || 1,
-                          product.quantityAvailable
+                          product.availableQuantity ?? product.quantityAvailable
                         )
                       }
                       inputProps={{
                         min: 1,
-                        max: Number(product.quantityAvailable || 1),
+                        max: Number(product.availableQuantity ?? product.quantityAvailable ?? 1),
                         style: { textAlign: "center", padding: "8px 6px", width: 48 }
                       }}
                       sx={{
@@ -225,8 +245,8 @@ const ProductsListingPage = () => {
                     />
                     <IconButton
                       size="small"
-                      onClick={() => handleQuantityChange(product._id, getSelectedQuantity(product) + 1, product.quantityAvailable)}
-                      disabled={getSelectedQuantity(product) >= Number(product.quantityAvailable || 1)}
+                      onClick={() => handleQuantityChange(product._id, getSelectedQuantity(product) + 1, product.availableQuantity ?? product.quantityAvailable)}
+                      disabled={getSelectedQuantity(product) >= Number(product.availableQuantity ?? product.quantityAvailable ?? 1)}
                       sx={{
                         color: "#111827",
                         border: "1px solid rgba(17, 24, 39, 0.22)",
@@ -257,7 +277,7 @@ const ProductsListingPage = () => {
                     variant="outlined"
                     fullWidth
                     onClick={() => handleAddToCart(product)}
-                    disabled={isAdding || product.availabilityStatus !== "In stock"}
+                    disabled={isAdding || Number(product.availableQuantity ?? product.quantityAvailable ?? 0) < 1}
                     sx={{
                       borderColor: siteSettings.addToCartColor,
                       color: siteSettings.addToCartColor,
@@ -269,7 +289,7 @@ const ProductsListingPage = () => {
                       }
                     }}
                   >
-                    {product.availabilityStatus !== "In stock"
+                    {Number(product.availableQuantity ?? product.quantityAvailable ?? 0) < 1
                       ? "Unavailable"
                       : isAuthenticated
                         ? "Add to Cart"

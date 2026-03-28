@@ -12,6 +12,7 @@ import AboutPage from "./pages/About/AboutPage";
 import ContactPage from "./pages/Contact/ContactPage";
 import FaqPage from "./pages/Info/FaqPage";
 import PolicyPage from "./pages/Info/PolicyPage";
+import NotFoundPage from "./pages/NotFound/NotFoundPage";
 const  App = ()=> {
 
   
@@ -36,6 +37,7 @@ const  App = ()=> {
           <Route path="/cart" element={<CartPage />} />
           <Route path="/products" element={<ProductsListingPage />} />
           <Route path="/products/:slug" element={<ProductDetailsPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Box>
       <WhatsAppFloat />

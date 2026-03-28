@@ -65,6 +65,7 @@ const theme = createTheme({
       styleOverrides: {
         contained: {
           backgroundColor: Colors.primary,
+          color: "#ffffff",
           "&:hover": {
             backgroundColor: Colors.primaryHover || Colors.primary,
           },

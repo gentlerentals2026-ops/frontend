@@ -9,6 +9,7 @@ import {
   IconButton,
   Paper,
   Rating,
+  Skeleton,
   Stack,
   TextField,
   Typography
@@ -79,12 +80,64 @@ const ProductDetailsPage = () => {
   const galleryImages = product?.images?.length ? product.images : [product?.imageUrl].filter(Boolean);
   const averageRating = Number(product?.averageRating || 0);
   const reviewCount = Number(product?.reviewCount || product?.reviews?.length || 0);
-  const isAvailable = product?.status === "available" && Number(product?.quantityAvailable || 0) > 0;
+  const isAvailable = product?.status === "available" && Number(product?.availableQuantity ?? product?.quantityAvailable ?? 0) > 0;
 
   if (isLoading) {
     return (
-      <Box sx={{ px: { xs: 2, md: 6 }, py: { xs: 4, md: 6 } }}>
-        <Typography sx={{ textAlign: "center", color: "text.secondary" }}>Loading listing...</Typography>
+      <Box
+        sx={{
+          px: { xs: 2, md: 6 },
+          py: { xs: 4, md: 6 },
+          background:
+            "linear-gradient(180deg, rgba(255,247,237,0.85) 0%, rgba(255,255,255,1) 28%, rgba(248,250,252,1) 100%)"
+        }}
+      >
+        <Skeleton variant="text" sx={{ width: 140, fontSize: "1rem", mb: 2 }} />
+        <Paper
+          sx={{
+            p: { xs: 2, md: 4 },
+            borderRadius: 3,
+            boxShadow: "0 24px 60px rgba(15, 23, 42, 0.10)",
+            overflow: "hidden"
+          }}
+        >
+          <Grid container spacing={4}>
+            <Grid item xs={12} md={6}>
+              <Skeleton variant="rectangular" sx={{ width: "100%", height: { xs: 320, md: 500 }, borderRadius: 3 }} />
+              <Stack direction="row" spacing={1.5} sx={{ mt: 2 }}>
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <Skeleton key={`thumb-${index}`} variant="rectangular" sx={{ width: 92, height: 92, borderRadius: 2 }} />
+                ))}
+              </Stack>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Stack spacing={2}>
+                <Stack direction="row" spacing={1.25}>
+                  <Skeleton variant="rounded" sx={{ width: 96, height: 32 }} />
+                  <Skeleton variant="rounded" sx={{ width: 90, height: 32 }} />
+                </Stack>
+                <Skeleton variant="text" sx={{ fontSize: "2.6rem", width: "65%" }} />
+                <Skeleton variant="text" sx={{ fontSize: "1rem", width: "50%" }} />
+                <Skeleton variant="text" sx={{ fontSize: "1rem", width: "100%" }} />
+                <Skeleton variant="text" sx={{ fontSize: "1rem", width: "92%" }} />
+                <Skeleton variant="text" sx={{ fontSize: "2.3rem", width: "34%" }} />
+                <Skeleton variant="rectangular" sx={{ width: "100%", height: 122, borderRadius: 3 }} />
+                <Grid container spacing={2}>
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <Grid item xs={12} sm={6} key={`meta-${index}`}>
+                      <Skeleton variant="text" sx={{ fontSize: "1rem", width: "90%" }} />
+                    </Grid>
+                  ))}
+                </Grid>
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+                  <Skeleton variant="rounded" sx={{ width: { xs: "100%", sm: 150 }, height: 48 }} />
+                  <Skeleton variant="rounded" sx={{ width: { xs: "100%", sm: 180 }, height: 48 }} />
+                  <Skeleton variant="rounded" sx={{ width: { xs: "100%", sm: 150 }, height: 48 }} />
+                </Stack>
+              </Stack>
+            </Grid>
+          </Grid>
+        </Paper>
       </Box>
     );
   }
@@ -242,8 +295,13 @@ const ProductDetailsPage = () => {
                       : "This listing is currently unavailable for booking."}
                   </Typography>
                   <Typography sx={{ color: "text.secondary" }}>
-                    Ideal for {product.category} setups, event halls, weddings, and styled receptions.
+                  Ideal for {product.category} setups, event halls, weddings, and styled receptions.
                   </Typography>
+                  {!!product.bookedQuantity && (
+                    <Typography sx={{ color: "#9a3412", fontWeight: 700 }}>
+                      {product.availabilityMessage}
+                    </Typography>
+                  )}
                 </Stack>
               </Paper>
 
@@ -254,7 +312,7 @@ const ProductDetailsPage = () => {
                   <Typography><strong>Category:</strong> {product.category}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Typography><strong>Available Units:</strong> {product.quantityAvailable}</Typography>
+                  <Typography><strong>Available Units:</strong> {product.availableQuantity ?? product.quantityAvailable}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Typography><strong>Availability:</strong> {product.availabilityStatus || (isAvailable ? "In stock" : "Unavailable")}</Typography>
@@ -295,12 +353,12 @@ const ProductDetailsPage = () => {
                     value={selectedQuantity}
                     onChange={(event) =>
                       setSelectedQuantity(
-                        Math.max(1, Math.min(Number(event.target.value) || 1, Number(product.quantityAvailable || 1)))
+                        Math.max(1, Math.min(Number(event.target.value) || 1, Number(product.availableQuantity ?? product.quantityAvailable ?? 1)))
                       )
                     }
                     inputProps={{
                       min: 1,
-                      max: Number(product.quantityAvailable || 1),
+                      max: Number(product.availableQuantity ?? product.quantityAvailable ?? 1),
                       style: { textAlign: "center", padding: "8px 6px", width: 56 }
                     }}
                     sx={{
@@ -315,8 +373,8 @@ const ProductDetailsPage = () => {
                     }}
                   />
                   <IconButton
-                    onClick={() => setSelectedQuantity((current) => Math.min(Number(product.quantityAvailable || 1), current + 1))}
-                    disabled={selectedQuantity >= Number(product.quantityAvailable || 1)}
+                    onClick={() => setSelectedQuantity((current) => Math.min(Number(product.availableQuantity ?? product.quantityAvailable ?? 1), current + 1))}
+                    disabled={selectedQuantity >= Number(product.availableQuantity ?? product.quantityAvailable ?? 1)}
                     sx={{
                       color: "#111827",
                       border: "1px solid rgba(17, 24, 39, 0.22)",
@@ -329,18 +387,16 @@ const ProductDetailsPage = () => {
                   </IconButton>
                 </Box>
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   onClick={handleAddToCart}
                   disabled={isAdding || !isAvailable}
                   sx={{
                     width: { xs: "100%", sm: "fit-content" },
-                    borderColor: siteSettings.addToCartColor,
-                    color: siteSettings.addToCartColor,
-                    backgroundColor: "#ffffff",
+                    backgroundColor: siteSettings.addToCartColor,
+                    color: "#ffffff",
                     "&:hover": {
-                      borderColor: siteSettings.addToCartColor,
-                      color: siteSettings.addToCartColor,
-                      backgroundColor: "rgba(255,255,255,0.96)"
+                      backgroundColor: siteSettings.addToCartColor,
+                      color: "#ffffff"
                     }
                   }}
                 >

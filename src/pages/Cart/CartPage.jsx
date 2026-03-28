@@ -49,6 +49,7 @@ const CartPage = () => {
   const [success, setSuccess] = useState("");
   const [quoteForm, setQuoteForm] = useState({
     eventDate: "",
+    rentalDays: 1,
     eventLocation: "",
     notes: ""
   });
@@ -80,6 +81,10 @@ const CartPage = () => {
     doc.text(`Phone: ${user?.phone || ""}`, 14, currentY);
     currentY += 7;
     doc.text(`Event Date: ${quoteForm.eventDate || "Not specified"}`, 14, currentY);
+    currentY += 7;
+    doc.text(`Rental Days: ${quoteForm.rentalDays || 1}`, 14, currentY);
+    currentY += 7;
+    doc.text(`Return Date: ${quotation.returnDate || "Not specified"}`, 14, currentY);
     currentY += 7;
     doc.text(`Location: ${quoteForm.eventLocation || "Not specified"}`, 14, currentY);
     currentY += 10;
@@ -120,6 +125,7 @@ const CartPage = () => {
 
       const payload = {
         eventDate: quoteForm.eventDate,
+        rentalDays: Number(quoteForm.rentalDays) || 1,
         eventLocation: quoteForm.eventLocation,
         notes: quoteForm.notes,
         items: items.map((item) => ({
@@ -355,8 +361,20 @@ const CartPage = () => {
         </Box>
       )}
 
-      <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Generate Quotation PDF</DialogTitle>
+      <Dialog
+        open={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            backgroundColor: "#ffffff",
+            color: "#111827",
+            borderRadius: 3
+          }
+        }}
+      >
+        <DialogTitle sx={{ color: "#111827", fontWeight: 800 }}>Generate Quotation PDF</DialogTitle>
         <DialogContent>
           <Stack spacing={2.5} sx={{ pt: 1 }}>
             <TextField
@@ -366,6 +384,39 @@ const CartPage = () => {
               value={quoteForm.eventDate}
               onChange={handleQuoteFormChange}
               InputLabelProps={{ shrink: true }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "#ffffff",
+                  color: "#111827"
+                },
+                "& .MuiInputLabel-root": {
+                  color: "#374151"
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: siteSettings.addToCartColor
+                }
+              }}
+              fullWidth
+            />
+            <TextField
+              label="Rental Days"
+              name="rentalDays"
+              type="number"
+              value={quoteForm.rentalDays}
+              onChange={handleQuoteFormChange}
+              inputProps={{ min: 1 }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "#ffffff",
+                  color: "#111827"
+                },
+                "& .MuiInputLabel-root": {
+                  color: "#374151"
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: siteSettings.addToCartColor
+                }
+              }}
               fullWidth
             />
             <TextField
@@ -373,6 +424,18 @@ const CartPage = () => {
               name="eventLocation"
               value={quoteForm.eventLocation}
               onChange={handleQuoteFormChange}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "#ffffff",
+                  color: "#111827"
+                },
+                "& .MuiInputLabel-root": {
+                  color: "#374151"
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: siteSettings.addToCartColor
+                }
+              }}
               fullWidth
             />
             <TextField
@@ -382,12 +445,24 @@ const CartPage = () => {
               onChange={handleQuoteFormChange}
               multiline
               minRows={4}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "#ffffff",
+                  color: "#111827"
+                },
+                "& .MuiInputLabel-root": {
+                  color: "#374151"
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: siteSettings.addToCartColor
+                }
+              }}
               fullWidth
             />
           </Stack>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setIsDialogOpen(false)} sx={{ color: "#111827" }}>Cancel</Button>
           <Button
             variant="contained"
             onClick={handleGenerateQuotation}
