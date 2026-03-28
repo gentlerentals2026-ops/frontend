@@ -10,6 +10,7 @@ import {
   Paper,
   Rating,
   Stack,
+  TextField,
   Typography
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -288,7 +289,31 @@ const ProductDetailsPage = () => {
                   >
                     <RemoveIcon />
                   </IconButton>
-                  <Typography sx={{ fontWeight: 700 }}>{selectedQuantity}</Typography>
+                  <TextField
+                    type="number"
+                    size="small"
+                    value={selectedQuantity}
+                    onChange={(event) =>
+                      setSelectedQuantity(
+                        Math.max(1, Math.min(Number(event.target.value) || 1, Number(product.quantityAvailable || 1)))
+                      )
+                    }
+                    inputProps={{
+                      min: 1,
+                      max: Number(product.quantityAvailable || 1),
+                      style: { textAlign: "center", padding: "8px 6px", width: 56 }
+                    }}
+                    sx={{
+                      width: 72,
+                      "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button": {
+                        WebkitAppearance: "none",
+                        margin: 0
+                      },
+                      "& input[type=number]": {
+                        MozAppearance: "textfield"
+                      }
+                    }}
+                  />
                   <IconButton
                     onClick={() => setSelectedQuantity((current) => Math.min(Number(product.quantityAvailable || 1), current + 1))}
                     disabled={selectedQuantity >= Number(product.quantityAvailable || 1)}
@@ -304,13 +329,19 @@ const ProductDetailsPage = () => {
                   </IconButton>
                 </Box>
                 <Button
-                  variant="contained"
+                  variant="outlined"
                   onClick={handleAddToCart}
                   disabled={isAdding || !isAvailable}
                   sx={{
                     width: { xs: "100%", sm: "fit-content" },
-                    backgroundColor: siteSettings.addToCartColor,
-                    "&:hover": { backgroundColor: siteSettings.addToCartColor }
+                    borderColor: siteSettings.addToCartColor,
+                    color: siteSettings.addToCartColor,
+                    backgroundColor: "#ffffff",
+                    "&:hover": {
+                      borderColor: siteSettings.addToCartColor,
+                      color: siteSettings.addToCartColor,
+                      backgroundColor: "rgba(255,255,255,0.96)"
+                    }
                   }}
                 >
                   {!isAvailable ? "Unavailable" : isAuthenticated ? "Add to Cart" : "Login to Add"}
@@ -319,7 +350,17 @@ const ProductDetailsPage = () => {
                   component={RouterLink}
                   to="/cart"
                   variant="outlined"
-                  sx={{ width: { xs: "100%", sm: "fit-content" } }}
+                  sx={{
+                    width: { xs: "100%", sm: "fit-content" },
+                    borderColor: siteSettings.addToCartColor,
+                    color: siteSettings.addToCartColor,
+                    backgroundColor: "#ffffff",
+                    "&:hover": {
+                      borderColor: siteSettings.addToCartColor,
+                      color: siteSettings.addToCartColor,
+                      backgroundColor: "rgba(255,255,255,0.96)"
+                    }
+                  }}
                 >
                   View Cart
                 </Button>

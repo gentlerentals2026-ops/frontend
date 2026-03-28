@@ -2,6 +2,7 @@ import { Alert, Box, Button, Grid, Paper, Stack, TextField, Typography } from "@
 import { useEffect, useState } from "react";
 import { AboutService } from "../../services/about/About";
 import { ContactService } from "../../services/contact/Contact";
+import { useSiteSettings } from "../../context/SiteSettingsContext";
 
 const initialForm = {
   name: "",
@@ -12,6 +13,7 @@ const initialForm = {
 };
 
 const ContactPage = () => {
+  const { siteSettings } = useSiteSettings();
   const [about, setAbout] = useState(null);
   const [form, setForm] = useState(initialForm);
   const [isLoading, setIsLoading] = useState(true);
@@ -132,7 +134,16 @@ const ContactPage = () => {
                   />
                 </Grid>
               </Grid>
-              <Button type="submit" variant="contained" sx={{ mt: 3, backgroundColor: "orange" }} disabled={isSubmitting}>
+              <Button
+                type="submit"
+                variant="contained"
+                sx={{
+                  mt: 3,
+                  backgroundColor: siteSettings.addToCartColor,
+                  "&:hover": { backgroundColor: siteSettings.addToCartColor }
+                }}
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? "Sending..." : "Send Message"}
               </Button>
             </Box>

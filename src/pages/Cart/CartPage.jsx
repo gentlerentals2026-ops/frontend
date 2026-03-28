@@ -246,7 +246,32 @@ const CartPage = () => {
                       <IconButton onClick={() => updateCartItem({ productId: item.productId, quantity: item.quantity - 1 })}>
                         <RemoveIcon />
                       </IconButton>
-                      <Typography sx={{ minWidth: 24, textAlign: "center", fontWeight: 700 }}>{item.quantity}</Typography>
+                      <TextField
+                        type="number"
+                        size="small"
+                        value={item.quantity}
+                        onChange={(event) =>
+                          updateCartItem({
+                            productId: item.productId,
+                            quantity: Math.max(1, Math.min(Number(event.target.value) || 1, Number(item.quantityAvailable || 1)))
+                          })
+                        }
+                        inputProps={{
+                          min: 1,
+                          max: Number(item.quantityAvailable || 1),
+                          style: { textAlign: "center", padding: "8px 6px", width: 56 }
+                        }}
+                        sx={{
+                          width: 72,
+                          "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button": {
+                            WebkitAppearance: "none",
+                            margin: 0
+                          },
+                          "& input[type=number]": {
+                            MozAppearance: "textfield"
+                          }
+                        }}
+                      />
                       <IconButton
                         onClick={() => updateCartItem({ productId: item.productId, quantity: item.quantity + 1 })}
                         disabled={item.quantity >= item.quantityAvailable}
@@ -301,12 +326,28 @@ const CartPage = () => {
             <Stack spacing={1.5}>
               <Button
                 variant="contained"
-                sx={{ backgroundColor: "orange" }}
+                sx={{
+                  backgroundColor: siteSettings.addToCartColor,
+                  "&:hover": { backgroundColor: siteSettings.addToCartColor }
+                }}
                 onClick={() => setIsDialogOpen(true)}
               >
                 Generate Quotation
               </Button>
-              <Button variant="outlined" color="error" onClick={() => clearCart()}>
+              <Button
+                variant="outlined"
+                onClick={() => clearCart()}
+                sx={{
+                  borderColor: siteSettings.addToCartColor,
+                  color: siteSettings.addToCartColor,
+                  backgroundColor: "#ffffff",
+                  "&:hover": {
+                    borderColor: siteSettings.addToCartColor,
+                    color: siteSettings.addToCartColor,
+                    backgroundColor: "rgba(255,255,255,0.96)"
+                  }
+                }}
+              >
                 Clear Cart
               </Button>
             </Stack>
@@ -347,7 +388,15 @@ const CartPage = () => {
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3 }}>
           <Button onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleGenerateQuotation} disabled={isGenerating}>
+          <Button
+            variant="contained"
+            onClick={handleGenerateQuotation}
+            disabled={isGenerating}
+            sx={{
+              backgroundColor: siteSettings.addToCartColor,
+              "&:hover": { backgroundColor: siteSettings.addToCartColor }
+            }}
+          >
             {isGenerating ? "Generating..." : "Generate & Send"}
           </Button>
         </DialogActions>

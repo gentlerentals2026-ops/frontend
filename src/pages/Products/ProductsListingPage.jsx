@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Card, CardContent, Chip, Grid, IconButton, Rating, Skeleton, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Card, CardContent, Chip, Grid, IconButton, Rating, Skeleton, Stack, TextField, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
@@ -196,9 +196,33 @@ const ProductsListingPage = () => {
                     >
                       <RemoveIcon fontSize="small" />
                     </IconButton>
-                    <Typography sx={{ minWidth: 24, textAlign: "center", fontWeight: 700 }}>
-                      {getSelectedQuantity(product)}
-                    </Typography>
+                    <TextField
+                      type="number"
+                      size="small"
+                      value={getSelectedQuantity(product)}
+                      onChange={(event) =>
+                        handleQuantityChange(
+                          product._id,
+                          Number(event.target.value) || 1,
+                          product.quantityAvailable
+                        )
+                      }
+                      inputProps={{
+                        min: 1,
+                        max: Number(product.quantityAvailable || 1),
+                        style: { textAlign: "center", padding: "8px 6px", width: 48 }
+                      }}
+                      sx={{
+                        width: 64,
+                        "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button": {
+                          WebkitAppearance: "none",
+                          margin: 0
+                        },
+                        "& input[type=number]": {
+                          MozAppearance: "textfield"
+                        }
+                      }}
+                    />
                     <IconButton
                       size="small"
                       onClick={() => handleQuantityChange(product._id, getSelectedQuantity(product) + 1, product.quantityAvailable)}
@@ -230,13 +254,19 @@ const ProductsListingPage = () => {
                     View Listing
                   </Button>
                   <Button
-                    variant="contained"
+                    variant="outlined"
                     fullWidth
                     onClick={() => handleAddToCart(product)}
                     disabled={isAdding || product.availabilityStatus !== "In stock"}
                     sx={{
-                      backgroundColor: siteSettings.addToCartColor,
-                      "&:hover": { backgroundColor: siteSettings.addToCartColor }
+                      borderColor: siteSettings.addToCartColor,
+                      color: siteSettings.addToCartColor,
+                      backgroundColor: "#ffffff",
+                      "&:hover": {
+                        borderColor: siteSettings.addToCartColor,
+                        color: siteSettings.addToCartColor,
+                        backgroundColor: "rgba(255,255,255,0.96)"
+                      }
                     }}
                   >
                     {product.availabilityStatus !== "In stock"
