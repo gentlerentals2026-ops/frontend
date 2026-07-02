@@ -4,7 +4,8 @@ const isBrowser = typeof window !== "undefined";
 const isLocalhost =
   isBrowser && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
 
-const productionApiUrl = process.env.REACT_APP_PRODUCTION_API_URL || "https://api.gentleevents.com";
+const productionApiUrl =
+  process.env.REACT_APP_PRODUCTION_API_URL || "https://api-gentlerentals.onrender.com";
 
 export const API = {
   BASE_URL:
