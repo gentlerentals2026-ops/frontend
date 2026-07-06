@@ -35,6 +35,11 @@ const initialResetState = {
   newPassword: ""
 };
 
+const initialDeleteState = {
+  password: "",
+  otp: ""
+};
+
 const AccountPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -45,6 +50,8 @@ const AccountPage = () => {
   const [loginForm, setLoginForm] = useState(initialLoginState);
   const [resetForm, setResetForm] = useState(initialResetState);
   const [resetMode, setResetMode] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [deleteForm, setDeleteForm] = useState(initialDeleteState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -82,6 +89,11 @@ const AccountPage = () => {
   const handleResetChange = (event) => {
     const { name, value } = event.target;
     setResetForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleDeleteChange = (event) => {
+    const { name, value } = event.target;
+    setDeleteForm((current) => ({ ...current, [name]: value }));
   };
 
   const persistAuth = (payload) => {
@@ -165,6 +177,40 @@ const AccountPage = () => {
       setSuccess("Password reset successful. You can log in now.");
     } catch (resetError) {
       setError(resetError.message || "Unable to reset password.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRequestDeleteConfirmation = async () => {
+    try {
+      setIsSubmitting(true);
+      setError("");
+      setSuccess("");
+      await AuthService.requestDeleteAccountConfirmation(deleteForm.password);
+      setDeleteMode(true);
+      setSuccess("A confirmation code has been sent to your email.");
+    } catch (deleteError) {
+      setError(deleteError.message || "Unable to request account deletion.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteAccount = async (event) => {
+    event.preventDefault();
+
+    try {
+      setIsSubmitting(true);
+      setError("");
+      setSuccess("");
+      await AuthService.confirmDeleteAccount({
+        email: loginForm.email || signupForm.email,
+        otp: deleteForm.otp
+      });
+      setSuccess("Account deleted successfully.");
+    } catch (deleteError) {
+      setError(deleteError.message || "Unable to delete account.");
     } finally {
       setIsSubmitting(false);
     }
@@ -258,61 +304,93 @@ const AccountPage = () => {
           {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
           {tab === 0 ? (
-            <Box component="form" onSubmit={handleLogin}>
-              <Stack spacing={2.5}>
-                <TextField
-                  label="Email Address"
-                  name="email"
-                  type="email"
-                  value={loginForm.email}
-                  onChange={handleLoginChange}
-                  fullWidth
-                />
-              <TextField
-                label="Password"
-                name="password"
-                type="password"
-                value={loginForm.password}
-                onChange={handleLoginChange}
-                fullWidth
-              />
-              <Button type="button" variant="text" onClick={() => setResetMode((current) => !current)}>
-                {resetMode ? "Back to login" : "Forgot password?"}
-              </Button>
-              <Button type="submit" variant="contained" size="large" disabled={isSubmitting}>
-                {isSubmitting ? "Logging in..." : "Login"}
-              </Button>
+            <Stack spacing={3}>
+              <Box component="form" onSubmit={handleLogin}>
+                <Stack spacing={2.5}>
+                  <TextField
+                    label="Email Address"
+                    name="email"
+                    type="email"
+                    value={loginForm.email}
+                    onChange={handleLoginChange}
+                    fullWidth
+                  />
+                  <TextField
+                    label="Password"
+                    name="password"
+                    type="password"
+                    value={loginForm.password}
+                    onChange={handleLoginChange}
+                    fullWidth
+                  />
+                  <Button type="submit" variant="contained" size="large" disabled={isSubmitting}>
+                    {isSubmitting ? "Logging in..." : "Login"}
+                  </Button>
+                </Stack>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography sx={{ fontWeight: 700, mb: 1 }}>Forgot password</Typography>
+                <Stack spacing={2}>
+                  <TextField
+                    label="Email Address"
+                    name="email"
+                    type="email"
+                    value={resetForm.email}
+                    onChange={handleResetChange}
+                    fullWidth
+                  />
+                  <Button type="button" variant="outlined" onClick={handleRequestReset} disabled={isSubmitting}>
+                    Request reset code
+                  </Button>
+                  {resetMode && (
+                    <Stack component="form" onSubmit={handleResetPassword} spacing={2}>
+                      <TextField label="OTP" name="otp" value={resetForm.otp} onChange={handleResetChange} fullWidth />
+                      <TextField
+                        label="New Password"
+                        name="newPassword"
+                        type="password"
+                        value={resetForm.newPassword}
+                        onChange={handleResetChange}
+                        fullWidth
+                      />
+                      <Button type="submit" variant="contained" size="large" disabled={isSubmitting}>
+                        {isSubmitting ? "Resetting..." : "Reset Password"}
+                      </Button>
+                    </Stack>
+                  )}
+                </Stack>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography sx={{ fontWeight: 700, mb: 1, color: "error.main" }}>Delete account</Typography>
+                <Stack spacing={2}>
+                  <TextField
+                    label="Account Password"
+                    name="password"
+                    type="password"
+                    value={deleteForm.password}
+                    onChange={handleDeleteChange}
+                    fullWidth
+                  />
+                  <Button type="button" variant="outlined" color="error" onClick={handleRequestDeleteConfirmation} disabled={isSubmitting}>
+                    Send delete confirmation
+                  </Button>
+                  {deleteMode && (
+                    <Stack component="form" onSubmit={handleDeleteAccount} spacing={2}>
+                      <TextField label="Confirmation OTP" name="otp" value={deleteForm.otp} onChange={handleDeleteChange} fullWidth />
+                      <Button type="submit" variant="contained" color="error" disabled={isSubmitting}>
+                        {isSubmitting ? "Deleting..." : "Delete Account"}
+                      </Button>
+                    </Stack>
+                  )}
+                </Stack>
+              </Box>
             </Stack>
-          </Box>
-          {resetMode && (
-            <Box component="form" onSubmit={handleResetPassword} sx={{ mt: 3 }}>
-              <Stack spacing={2.5}>
-                <TextField
-                  label="Email Address"
-                  name="email"
-                  type="email"
-                  value={resetForm.email}
-                  onChange={handleResetChange}
-                  fullWidth
-                />
-                <TextField label="OTP" name="otp" value={resetForm.otp} onChange={handleResetChange} fullWidth />
-                <TextField
-                  label="New Password"
-                  name="newPassword"
-                  type="password"
-                  value={resetForm.newPassword}
-                  onChange={handleResetChange}
-                  fullWidth
-                />
-                <Button type="button" variant="outlined" onClick={handleRequestReset} disabled={isSubmitting}>
-                  Request reset code
-                </Button>
-                <Button type="submit" variant="contained" size="large" disabled={isSubmitting}>
-                  {isSubmitting ? "Resetting..." : "Reset Password"}
-                </Button>
-              </Stack>
-            </Box>
-          )}
           ) : (
             <Box component="form" onSubmit={handleSignup}>
               <Stack spacing={2.5}>

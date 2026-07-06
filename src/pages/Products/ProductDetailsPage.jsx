@@ -20,6 +20,7 @@ import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { ProductService } from "../../services/products/Product";
+import { API } from "../../constant/apiConstant";
 import { useAddToCartMutation } from "../../services/api/cartApi";
 import { useSiteSettings } from "../../context/SiteSettingsContext";
 
@@ -38,6 +39,9 @@ const ProductDetailsPage = () => {
   const [cartMessage, setCartMessage] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
   const [selectedQuantity, setSelectedQuantity] = useState(1);
+  const [backInStockEmail, setBackInStockEmail] = useState("");
+  const [backInStockName, setBackInStockName] = useState("");
+  const [backInStockMessage, setBackInStockMessage] = useState("");
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -75,6 +79,36 @@ const ProductDetailsPage = () => {
       .unwrap()
       .then(() => setCartMessage(`${product.title} added to cart.`))
       .catch((cartError) => setCartMessage(cartError?.data?.message || "Unable to add product to cart."));
+  };
+
+  const handleBackInStock = async (event) => {
+    event.preventDefault();
+
+    try {
+      setBackInStockMessage("");
+      const response = await fetch(`${API.BASE_URL}/api/stock/back-in-stock/subscribe`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          productId: product._id,
+          email: backInStockEmail,
+          fullName: backInStockName
+        })
+      });
+      const json = await response.json();
+
+      if (!response.ok) {
+        throw new Error(json?.message || "Unable to subscribe for stock alerts.");
+      }
+
+      setBackInStockMessage("We’ll email you when this item is back in stock.");
+      setBackInStockEmail("");
+      setBackInStockName("");
+    } catch (stockError) {
+      setBackInStockMessage(stockError.message || "Unable to subscribe.");
+    }
   };
 
   const galleryImages = product?.images?.length ? product.images : [product?.imageUrl].filter(Boolean);
@@ -306,6 +340,40 @@ const ProductDetailsPage = () => {
               </Paper>
 
               <Divider />
+
+              {!isAvailable && (
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    p: 2.5,
+                    borderRadius: 3,
+                    borderColor: "rgba(79, 70, 229, 0.18)",
+                    backgroundColor: "#eef2ff"
+                  }}
+                >
+                  <Stack component="form" spacing={2} onSubmit={handleBackInStock}>
+                    <Typography sx={{ fontWeight: 800, color: "#3730a3" }}>Notify me when back in stock</Typography>
+                    <TextField
+                      label="Your name"
+                      value={backInStockName}
+                      onChange={(event) => setBackInStockName(event.target.value)}
+                      fullWidth
+                    />
+                    <TextField
+                      label="Email address"
+                      type="email"
+                      value={backInStockEmail}
+                      onChange={(event) => setBackInStockEmail(event.target.value)}
+                      fullWidth
+                      required
+                    />
+                    <Button type="submit" variant="contained">
+                      Notify me
+                    </Button>
+                    {backInStockMessage && <Alert severity="info">{backInStockMessage}</Alert>}
+                  </Stack>
+                </Paper>
+              )}
 
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>

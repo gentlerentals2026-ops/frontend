@@ -65,6 +65,44 @@ export const AuthService = {
     return json;
   },
 
+  requestDeleteAccountConfirmation: async (password) => {
+    const response = await fetch(`${API.BASE_URL}/api/auth/delete-account/request-confirmation`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ password })
+    });
+
+    const json = await parseJsonSafely(response);
+
+    if (!response.ok) {
+      throw new Error(getErrorMessage(response, json, "Unable to request account deletion"));
+    }
+
+    return json;
+  },
+
+  confirmDeleteAccount: async ({ email, otp }) => {
+    const response = await fetch(`${API.BASE_URL}/api/auth/delete-account/confirm`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, otp })
+    });
+
+    const json = await parseJsonSafely(response);
+
+    if (!response.ok) {
+      throw new Error(getErrorMessage(response, json, "Unable to delete account"));
+    }
+
+    return json;
+  },
+
   logout: async () => {
     try {
       const response = await fetch(`${API.BASE_URL}/api/auth/logout`, {
