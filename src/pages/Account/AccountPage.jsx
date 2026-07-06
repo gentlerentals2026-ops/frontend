@@ -29,6 +29,12 @@ const initialLoginState = {
   password: ""
 };
 
+const initialResetState = {
+  email: "",
+  otp: "",
+  newPassword: ""
+};
+
 const AccountPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -37,6 +43,8 @@ const AccountPage = () => {
   const [tab, setTab] = useState(0);
   const [signupForm, setSignupForm] = useState(initialSignupState);
   const [loginForm, setLoginForm] = useState(initialLoginState);
+  const [resetForm, setResetForm] = useState(initialResetState);
+  const [resetMode, setResetMode] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -69,6 +77,11 @@ const AccountPage = () => {
   const handleLoginChange = (event) => {
     const { name, value } = event.target;
     setLoginForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleResetChange = (event) => {
+    const { name, value } = event.target;
+    setResetForm((current) => ({ ...current, [name]: value }));
   };
 
   const persistAuth = (payload) => {
@@ -120,6 +133,38 @@ const AccountPage = () => {
       navigate("/products");
     } catch (loginError) {
       setError(loginError.message || "Unable to login.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRequestReset = async () => {
+    try {
+      setIsSubmitting(true);
+      setError("");
+      setSuccess("");
+      await AuthService.forgotPassword(resetForm.email);
+      setResetMode(true);
+      setSuccess("If the email exists, a reset code has been sent.");
+    } catch (resetError) {
+      setError(resetError.message || "Unable to request password reset.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleResetPassword = async (event) => {
+    event.preventDefault();
+    try {
+      setIsSubmitting(true);
+      setError("");
+      setSuccess("");
+      await AuthService.resetPassword(resetForm);
+      setResetMode(false);
+      setResetForm(initialResetState);
+      setSuccess("Password reset successful. You can log in now.");
+    } catch (resetError) {
+      setError(resetError.message || "Unable to reset password.");
     } finally {
       setIsSubmitting(false);
     }
@@ -223,19 +268,51 @@ const AccountPage = () => {
                   onChange={handleLoginChange}
                   fullWidth
                 />
+              <TextField
+                label="Password"
+                name="password"
+                type="password"
+                value={loginForm.password}
+                onChange={handleLoginChange}
+                fullWidth
+              />
+              <Button type="button" variant="text" onClick={() => setResetMode((current) => !current)}>
+                {resetMode ? "Back to login" : "Forgot password?"}
+              </Button>
+              <Button type="submit" variant="contained" size="large" disabled={isSubmitting}>
+                {isSubmitting ? "Logging in..." : "Login"}
+              </Button>
+            </Stack>
+          </Box>
+          {resetMode && (
+            <Box component="form" onSubmit={handleResetPassword} sx={{ mt: 3 }}>
+              <Stack spacing={2.5}>
                 <TextField
-                  label="Password"
-                  name="password"
-                  type="password"
-                  value={loginForm.password}
-                  onChange={handleLoginChange}
+                  label="Email Address"
+                  name="email"
+                  type="email"
+                  value={resetForm.email}
+                  onChange={handleResetChange}
                   fullWidth
                 />
+                <TextField label="OTP" name="otp" value={resetForm.otp} onChange={handleResetChange} fullWidth />
+                <TextField
+                  label="New Password"
+                  name="newPassword"
+                  type="password"
+                  value={resetForm.newPassword}
+                  onChange={handleResetChange}
+                  fullWidth
+                />
+                <Button type="button" variant="outlined" onClick={handleRequestReset} disabled={isSubmitting}>
+                  Request reset code
+                </Button>
                 <Button type="submit" variant="contained" size="large" disabled={isSubmitting}>
-                  {isSubmitting ? "Logging in..." : "Login"}
+                  {isSubmitting ? "Resetting..." : "Reset Password"}
                 </Button>
               </Stack>
             </Box>
+          )}
           ) : (
             <Box component="form" onSubmit={handleSignup}>
               <Stack spacing={2.5}>
