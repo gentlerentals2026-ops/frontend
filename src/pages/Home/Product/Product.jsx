@@ -1,17 +1,23 @@
-import { Box, Grid, Card, CardMedia, CardContent, Typography, Button, Skeleton } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
+import { Box, Grid, Card, CardMedia, CardContent, Typography, Button, Skeleton, Stack } from "@mui/material";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { ProductService } from "../../../services/products/Product";
+import { useAddToCartMutation } from "../../../services/api/cartApi";
 import { useSiteSettings } from "../../../context/SiteSettingsContext";
 
 const skeletonItems = Array.from({ length: 8 }, (_, index) => index);
+const orderNowKey = "gentle_events_order_now";
 
 export default function ProductPage() {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((state) => state.appState);
   const { siteSettings } = useSiteSettings();
   const [showAll, setShowAll] = useState(false);
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [addToCart, { isLoading: isAdding }] = useAddToCartMutation();
 
   const isMobile = window.innerWidth < 768;
 
@@ -36,6 +42,37 @@ export default function ProductPage() {
 
   const formatPrice = (price) =>
     Number(price || 0).toLocaleString("en-NG");
+
+  const handleAddToCart = (product) => {
+    if (!isAuthenticated) {
+      navigate("/account");
+      return;
+    }
+
+    addToCart({ productId: product._id, quantity: 1 });
+  };
+
+  const handleOrderNow = (product) => {
+    if (!isAuthenticated) {
+      navigate("/account");
+      return;
+    }
+
+    const orderItem = {
+      productId: product._id,
+      title: product.title,
+      slug: product.slug,
+      quantity: 1,
+      unitPrice: Number(product.price) || 0,
+      imageUrl: product.imageUrl,
+      quantityAvailable: product.quantityAvailable,
+      availableQuantity: product.availableQuantity,
+      lineTotal: Number(product.price) || 0
+    };
+
+    sessionStorage.setItem(orderNowKey, JSON.stringify(orderItem));
+    navigate("/generate-quotation", { state: { orderNowItem: orderItem } });
+  };
 
   return (
     <Box sx={{ p: { xs: 2, md: 5 } }}>
@@ -129,21 +166,53 @@ export default function ProductPage() {
                 </Typography>
               </CardContent>
 
-              <Button
-                component={RouterLink}
-                to={`/products/${item.slug}`}
-                variant="contained"
-                fullWidth
-                sx={{
-                  backgroundColor: siteSettings.addToCartColor,
-                  color: "white",
-                  borderRadius: 0,
-                  py: 1.3,
-                  "&:hover": { backgroundColor: siteSettings.addToCartColor },
-                }}
-              >
-                View Listing
-              </Button>
+              <Stack spacing={1} sx={{ mt: "auto", p: 1.5 }}>
+                <Button
+                  component={RouterLink}
+                  to={`/products/${item.slug}`}
+                  variant="contained"
+                  fullWidth
+                  sx={{
+                    backgroundColor: siteSettings.addToCartColor,
+                    color: "white",
+                    py: 1.1,
+                    "&:hover": { backgroundColor: siteSettings.addToCartColor }
+                  }}
+                >
+                  View Listing
+                </Button>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  disabled={isAdding}
+                  onClick={() => handleAddToCart(item)}
+                  sx={{
+                    borderColor: siteSettings.addToCartColor,
+                    color: siteSettings.addToCartColor,
+                    backgroundColor: "#ffffff",
+                    py: 1.1,
+                    "&:hover": {
+                      borderColor: siteSettings.addToCartColor,
+                      color: siteSettings.addToCartColor,
+                      backgroundColor: "rgba(255,255,255,0.96)"
+                    }
+                  }}
+                >
+                  Add to Cart
+                </Button>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  onClick={() => handleOrderNow(item)}
+                  sx={{
+                    backgroundColor: "#111827",
+                    py: 1.1,
+                    "&:hover": { backgroundColor: "#111827" }
+                  }}
+                >
+                  Order Now
+                </Button>
+              </Stack>
             </Card>
           </Grid>
         ))}
