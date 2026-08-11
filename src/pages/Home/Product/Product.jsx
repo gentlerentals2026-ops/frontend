@@ -92,7 +92,7 @@ export default function ProductPage() {
         </Typography>
       )}
 
-      <Grid container spacing={3} justifyContent="center">
+      <Grid container spacing={3} justifyContent="center" alignItems="stretch">
         {isLoading &&
           skeletonItems.map((item) => (
             <Grid
@@ -102,11 +102,12 @@ export default function ProductPage() {
               sm={6}
               md={4}
               lg={3}
-              sx={{ display: "flex", justifyContent: "center" }}
+              sx={{ display: "flex", justifyContent: "center", width: "100%" }}
             >
               <Card
                 sx={{
                   width: "100%",
+                  flex: 1,
                   borderRadius: 3,
                   boxShadow: 3,
                   display: "flex",
@@ -129,18 +130,19 @@ export default function ProductPage() {
           ))}
 
         {displayedProducts.map((item) => (
-          <Grid
+            <Grid
             item
             key={item._id}
             xs={12}
             sm={6}
             md={4}
             lg={3}
-            sx={{ display: "flex", justifyContent: "center" }}
+            sx={{ display: "flex", justifyContent: "center", width: "100%" }}
           >
             <Card
               sx={{
                 width: "100%",
+                flex: 1,
                 borderRadius: 3,
                 boxShadow: 3,
                 display: "flex",
