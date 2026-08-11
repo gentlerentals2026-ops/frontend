@@ -20,8 +20,8 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import RemoveIcon from "@mui/icons-material/Remove";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
-import { useState } from "react";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { QuotationService } from "../../services/quotation/Quotation";
 import { jsPDF } from "jspdf";
@@ -38,6 +38,7 @@ const brandLogoPath = `${process.env.PUBLIC_URL || ""}/logo.png`;
 
 const CartPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated, user } = useSelector((state) => state.appState);
   const { siteSettings } = useSiteSettings();
   const { data: cartResponse, isLoading: isLoadingCart } = useGetCartQuery(undefined, { skip: !isAuthenticated });
@@ -57,10 +58,16 @@ const CartPage = () => {
     emergencyContactPhone: "",
     notes: ""
   });
-
-  const items = cartResponse?.data?.items || [];
+  const orderNowItem = location.state?.orderNowItem || null;
+  const items = orderNowItem ? [orderNowItem] : cartResponse?.data?.items || [];
   const totalItems = cartResponse?.data?.totalItems || 0;
   const subtotal = cartResponse?.data?.subtotal || 0;
+
+  useEffect(() => {
+    if (orderNowItem) {
+      setIsDialogOpen(true);
+    }
+  }, [orderNowItem]);
 
   const handleQuoteFormChange = (event) => {
     const { name, value } = event.target;

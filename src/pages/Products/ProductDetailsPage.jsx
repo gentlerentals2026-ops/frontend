@@ -97,7 +97,7 @@ const ProductDetailsPage = () => {
     };
 
     sessionStorage.setItem(orderNowKey, JSON.stringify(orderItem));
-    navigate("/cart", { state: { orderNowItem: orderItem } });
+    navigate("/generate-quotation", { state: { orderNowItem: orderItem } });
   };
 
   const handleBackInStock = async (event) => {

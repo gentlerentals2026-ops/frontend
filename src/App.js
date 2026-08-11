@@ -37,6 +37,7 @@ const  App = ()=> {
           <Route path="/cancellation-policy" element={<PolicyPage type="cancellation" />} />
           <Route path="/brochure" element={<PolicyPage type="brochure" />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/generate-quotation" element={<CartPage />} />
           <Route path="/products" element={<ProductsListingPage />} />
           <Route path="/products/:slug" element={<ProductDetailsPage />} />
           <Route path="*" element={<Home />} />
