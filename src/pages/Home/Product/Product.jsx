@@ -107,14 +107,14 @@ export default function ProductPage() {
               <Card
                 sx={{
                   width: "100%",
-                  maxWidth: 350,
                   borderRadius: 3,
                   boxShadow: 3,
                   display: "flex",
-                  flexDirection: "column"
+                  flexDirection: "column",
+                  minWidth: 0
                 }}
               >
-                <Skeleton variant="rectangular" sx={{ height: { xs: 220, sm: 200 } }} />
+                <Skeleton variant="rectangular" sx={{ width: "100%", aspectRatio: "16 / 10" }} />
                 <CardContent sx={{ textAlign: "center", minHeight: 96, pb: 1 }}>
                   <Skeleton variant="text" sx={{ fontSize: "1.2rem", mx: "auto", width: "72%" }} />
                   <Skeleton variant="text" sx={{ fontSize: "1rem", mx: "auto", width: "38%" }} />
@@ -141,23 +141,34 @@ export default function ProductPage() {
             <Card
               sx={{
                 width: "100%",
-                maxWidth: 350,
                 borderRadius: 3,
                 boxShadow: 3,
                 display: "flex",
                 flexDirection: "column",
-                overflow: "hidden"
+                overflow: "hidden",
+                minWidth: 0
               }}
             >
-              <CardMedia
-                component="img"
-                image={item.imageUrl}
-                alt={item.title}
+              <Box
                 sx={{
-                  height: { xs: 220, sm: 200 },
-                  objectFit: "cover"
+                  width: "100%",
+                  aspectRatio: "16 / 10",
+                  overflow: "hidden",
+                  backgroundColor: "#f8fafc"
                 }}
-              />
+              >
+                <CardMedia
+                  component="img"
+                  image={item.imageUrl}
+                  alt={item.title}
+                  sx={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    display: "block"
+                  }}
+                />
+              </Box>
 
               <CardContent
                 sx={{
