@@ -25,6 +25,7 @@ import { useAddToCartMutation } from "../../services/api/cartApi";
 import { useSiteSettings } from "../../context/SiteSettingsContext";
 
 const formatPrice = (price) => Number(price || 0).toLocaleString("en-NG");
+const orderNowKey = "gentle_events_order_now";
 
 const ProductDetailsPage = () => {
   const navigate = useNavigate();
@@ -79,6 +80,24 @@ const ProductDetailsPage = () => {
       .unwrap()
       .then(() => setCartMessage(`${product.title} added to cart.`))
       .catch((cartError) => setCartMessage(cartError?.data?.message || "Unable to add product to cart."));
+  };
+
+  const handleOrderNow = () => {
+    const quantity = Number(selectedQuantity) || 1;
+    const orderItem = {
+      productId: product._id,
+      title: product.title,
+      slug: product.slug,
+      quantity,
+      unitPrice: Number(product.price) || 0,
+      imageUrl: product.imageUrl,
+      quantityAvailable: product.quantityAvailable,
+      availableQuantity: product.availableQuantity,
+      lineTotal: quantity * (Number(product.price) || 0)
+    };
+
+    sessionStorage.setItem(orderNowKey, JSON.stringify(orderItem));
+    navigate("/cart", { state: { orderNowItem: orderItem } });
   };
 
   const handleBackInStock = async (event) => {
@@ -467,8 +486,21 @@ const ProductDetailsPage = () => {
                       color: "#ffffff"
                     }
                   }}
-                >
+                  >
                   {!isAvailable ? "Unavailable" : isAuthenticated ? "Add to Cart" : "Login to Add"}
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={handleOrderNow}
+                  disabled={!isAvailable}
+                  sx={{
+                    width: { xs: "100%", sm: "fit-content" },
+                    backgroundColor: "#111827",
+                    color: "#ffffff",
+                    "&:hover": { backgroundColor: "#111827" }
+                  }}
+                >
+                  Order Now
                 </Button>
                 <Button
                   component={RouterLink}

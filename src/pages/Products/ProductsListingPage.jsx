@@ -10,6 +10,7 @@ import { useSiteSettings } from "../../context/SiteSettingsContext";
 
 const formatPrice = (price) => Number(price || 0).toLocaleString("en-NG");
 const skeletonItems = Array.from({ length: 8 }, (_, index) => index);
+const orderNowKey = "gentle_events_order_now";
 
 const ProductsListingPage = () => {
   const navigate = useNavigate();
@@ -58,6 +59,29 @@ const ProductsListingPage = () => {
       .unwrap()
       .then(() => setCartMessage(`${product.title} added to cart.`))
       .catch((cartError) => setCartMessage(cartError?.data?.message || "Unable to add product to cart."));
+  };
+
+  const handleOrderNow = (product) => {
+    if (!isAuthenticated) {
+      navigate("/account");
+      return;
+    }
+
+    const quantity = getSelectedQuantity(product);
+    const orderItem = {
+      productId: product._id,
+      title: product.title,
+      slug: product.slug,
+      quantity,
+      unitPrice: Number(product.price) || 0,
+      imageUrl: product.imageUrl,
+      quantityAvailable: product.quantityAvailable,
+      availableQuantity: product.availableQuantity,
+      lineTotal: quantity * (Number(product.price) || 0)
+    };
+
+    sessionStorage.setItem(orderNowKey, JSON.stringify(orderItem));
+    navigate("/cart", { state: { orderNowItem: orderItem } });
   };
 
   return (
@@ -294,6 +318,18 @@ const ProductsListingPage = () => {
                       : isAuthenticated
                         ? "Add to Cart"
                         : "Login to Add"}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={() => handleOrderNow(product)}
+                    disabled={Number(product.availableQuantity ?? product.quantityAvailable ?? 0) < 1}
+                    sx={{
+                      backgroundColor: "#111827",
+                      "&:hover": { backgroundColor: "#111827" }
+                    }}
+                  >
+                    Order Now
                   </Button>
                 </Stack>
               </CardContent>

@@ -34,6 +34,7 @@ import {
 } from "../../services/api/cartApi";
 
 const formatPrice = (price) => Number(price || 0).toLocaleString("en-NG");
+const brandLogoPath = `${process.env.PUBLIC_URL || ""}/logo.png`;
 
 const CartPage = () => {
   const navigate = useNavigate();
@@ -70,13 +71,46 @@ const CartPage = () => {
     }));
   };
 
-  const generatePdf = (quotation) => {
+  const generatePdf = async (quotation) => {
     const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     let currentY = 20;
 
-    doc.setFontSize(18);
-    doc.text("Gentle Rentals Quotation", 14, currentY);
-    currentY += 10;
+    const logoDataUrl = await fetch(brandLogoPath)
+      .then((response) => response.blob())
+      .then(
+        (blob) =>
+          new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+          })
+      )
+      .catch(() => null);
+
+    const addHeader = () => {
+      if (logoDataUrl) {
+        doc.addImage(logoDataUrl, "PNG", pageWidth / 2 - 18, 12, 36, 18);
+      }
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text("Gentle Rentals Quotation", pageWidth / 2, 36, { align: "center" });
+      doc.setFont("helvetica", "normal");
+    };
+
+    const addFooter = () => {
+      const footerY = pageHeight - 16;
+      if (logoDataUrl) {
+        doc.addImage(logoDataUrl, "PNG", pageWidth / 2 - 10, footerY - 8, 20, 10);
+      }
+      doc.setFontSize(9);
+      doc.setTextColor(107, 114, 128);
+      doc.text("Gentle Events", pageWidth / 2, footerY + 4, { align: "center" });
+    };
+
+    addHeader();
+    currentY = 52;
 
     doc.setFontSize(11);
     doc.text(`Quote No: ${quotation.quoteNumber}`, 14, currentY);
@@ -87,13 +121,13 @@ const CartPage = () => {
     currentY += 7;
     doc.text(`Phone: ${user?.phone || ""}`, 14, currentY);
     currentY += 7;
-    doc.text(`Event Date: ${quoteForm.eventDate || "Not specified"}`, 14, currentY);
+    doc.text(`Event Date: ${quotation.eventDate || quoteForm.eventDate || "Not specified"}`, 14, currentY);
     currentY += 7;
-    doc.text(`Rental Days: ${quoteForm.rentalDays || 1}`, 14, currentY);
+    doc.text(`Rental Days: ${quotation.rentalDays || quoteForm.rentalDays || 1}`, 14, currentY);
     currentY += 7;
     doc.text(`Return Date: ${quotation.returnDate || "Not specified"}`, 14, currentY);
     currentY += 7;
-    doc.text(`Location: ${quoteForm.eventLocation || "Not specified"}`, 14, currentY);
+    doc.text(`Location: ${quotation.eventLocation || quoteForm.eventLocation || "Not specified"}`, 14, currentY);
     currentY += 7;
     doc.text(`Emergency Contact: ${quoteForm.emergencyContactName || "Not specified"}`, 14, currentY);
     currentY += 7;
@@ -104,19 +138,24 @@ const CartPage = () => {
     doc.text("Items", 14, currentY);
     currentY += 8;
 
-    items.forEach((item, index) => {
-      const lineTotal = Number(item.lineTotal || item.unitPrice * item.quantity * Number(quoteForm.rentalDays || 1));
-      const line = `${index + 1}. ${item.title} - Qty ${item.quantity} x ${Number(quoteForm.rentalDays || 1)} days x N${formatPrice(
+    (quotation.items || items).forEach((item, index) => {
+      const lineTotal = Number(item.lineTotal || item.unitPrice * item.quantity * Number(quotation.rentalDays || quoteForm.rentalDays || 1));
+      const rentalDays = Number(quotation.rentalDays || quoteForm.rentalDays || 1);
+      const line = `${index + 1}. ${item.title} - Qty ${item.quantity} x ${rentalDays} days x N${formatPrice(
         item.unitPrice
       )} = N${formatPrice(lineTotal)}`;
+      if (currentY > pageHeight - 28) {
+        doc.addPage();
+        currentY = 20;
+      }
       doc.text(line, 14, currentY);
       currentY += 7;
     });
 
     currentY += 4;
-    doc.text(`Total Items: ${totalItems}`, 14, currentY);
+    doc.text(`Total Items: ${quotation.totalItems || totalItems}`, 14, currentY);
     currentY += 7;
-    doc.text(`Subtotal: N${formatPrice(subtotal)}`, 14, currentY);
+    doc.text(`Subtotal: N${formatPrice(quotation.subtotal || subtotal)}`, 14, currentY);
     currentY += 10;
 
     if (quoteForm.notes) {
@@ -126,6 +165,7 @@ const CartPage = () => {
       doc.text(splitNotes, 14, currentY);
     }
 
+    addFooter();
     doc.save(`${quotation.quoteNumber}.pdf`);
   };
 
@@ -181,7 +221,7 @@ const CartPage = () => {
       };
 
       const response = await QuotationService.createQuotation(payload);
-      generatePdf(response.data);
+      await generatePdf(response.data);
       setSuccess("Quotation generated and sent to admin successfully.");
       setIsDialogOpen(false);
       setQuoteForm({
