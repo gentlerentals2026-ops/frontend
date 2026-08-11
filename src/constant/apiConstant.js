@@ -5,7 +5,7 @@ const isLocalhost =
   isBrowser && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
 
 const productionApiUrl =
-  process.env.REACT_APP_PRODUCTION_API_URL || process.env.REACT_APP_API_URL || "https://api.gentleevents.com";
+  process.env.REACT_APP_PRODUCTION_API_URL || "https://api-gentlerentals.onrender.com";
 
 export const API = {
   BASE_URL:
