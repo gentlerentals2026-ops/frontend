@@ -105,9 +105,10 @@ const CartPage = () => {
     currentY += 8;
 
     items.forEach((item, index) => {
-      const line = `${index + 1}. ${item.title} - Qty ${item.quantity} x N${formatPrice(item.unitPrice)} = N${formatPrice(
-        item.unitPrice * item.quantity
-      )}`;
+      const lineTotal = Number(item.lineTotal || item.unitPrice * item.quantity * Number(quoteForm.rentalDays || 1));
+      const line = `${index + 1}. ${item.title} - Qty ${item.quantity} x ${Number(quoteForm.rentalDays || 1)} days x N${formatPrice(
+        item.unitPrice
+      )} = N${formatPrice(lineTotal)}`;
       doc.text(line, 14, currentY);
       currentY += 7;
     });

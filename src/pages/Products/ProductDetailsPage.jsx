@@ -38,7 +38,7 @@ const ProductDetailsPage = () => {
   const [error, setError] = useState("");
   const [cartMessage, setCartMessage] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
-  const [selectedQuantity, setSelectedQuantity] = useState(1);
+  const [selectedQuantity, setSelectedQuantity] = useState("1");
   const [backInStockEmail, setBackInStockEmail] = useState("");
   const [backInStockName, setBackInStockName] = useState("");
   const [backInStockMessage, setBackInStockMessage] = useState("");
@@ -52,7 +52,7 @@ const ProductDetailsPage = () => {
         const productData = response.data || null;
         setProduct(productData);
         setSelectedImage(productData?.imageUrl || productData?.images?.[0] || "");
-        setSelectedQuantity(1);
+        setSelectedQuantity("1");
 
         const listingResponse = await ProductService.getProducts();
         const related = (listingResponse.data || [])
@@ -75,7 +75,7 @@ const ProductDetailsPage = () => {
       return;
     }
 
-    addToCart({ productId: product._id, quantity: selectedQuantity })
+    addToCart({ productId: product._id, quantity: Number(selectedQuantity) || 1 })
       .unwrap()
       .then(() => setCartMessage(`${product.title} added to cart.`))
       .catch((cartError) => setCartMessage(cartError?.data?.message || "Unable to add product to cart."));
@@ -114,6 +114,8 @@ const ProductDetailsPage = () => {
   const galleryImages = product?.images?.length ? product.images : [product?.imageUrl].filter(Boolean);
   const averageRating = Number(product?.averageRating || 0);
   const reviewCount = Number(product?.reviewCount || product?.reviews?.length || 0);
+  const quantityValue = selectedQuantity === "" ? "" : Number(selectedQuantity) || "";
+  const maxQuantity = Number(product?.availableQuantity ?? product?.quantityAvailable ?? 1);
   const isAvailable = product?.status === "available" && Number(product?.availableQuantity ?? product?.quantityAvailable ?? 0) > 0;
 
   if (isLoading) {
@@ -404,7 +406,7 @@ const ProductDetailsPage = () => {
                 >
                   <IconButton
                     onClick={() => setSelectedQuantity((current) => Math.max(1, current - 1))}
-                    disabled={selectedQuantity <= 1}
+                    disabled={Number(selectedQuantity) <= 1}
                     sx={{
                       color: "#111827",
                       border: "1px solid rgba(17, 24, 39, 0.22)",
@@ -418,15 +420,13 @@ const ProductDetailsPage = () => {
                   <TextField
                     type="number"
                     size="small"
-                    value={selectedQuantity}
+                    value={quantityValue}
                     onChange={(event) =>
-                      setSelectedQuantity(
-                        Math.max(1, Math.min(Number(event.target.value) || 1, Number(product.availableQuantity ?? product.quantityAvailable ?? 1)))
-                      )
+                      setSelectedQuantity(event.target.value === "" ? "" : String(Math.max(1, Math.min(Number(event.target.value) || 1, maxQuantity))))
                     }
                     inputProps={{
                       min: 1,
-                      max: Number(product.availableQuantity ?? product.quantityAvailable ?? 1),
+                      max: maxQuantity,
                       style: { textAlign: "center", padding: "8px 6px", width: 56 }
                     }}
                     sx={{
@@ -441,8 +441,8 @@ const ProductDetailsPage = () => {
                     }}
                   />
                   <IconButton
-                    onClick={() => setSelectedQuantity((current) => Math.min(Number(product.availableQuantity ?? product.quantityAvailable ?? 1), current + 1))}
-                    disabled={selectedQuantity >= Number(product.availableQuantity ?? product.quantityAvailable ?? 1)}
+                    onClick={() => setSelectedQuantity(String(Math.min(maxQuantity, (Number(selectedQuantity) || 1) + 1)))}
+                    disabled={Number(selectedQuantity) >= maxQuantity}
                     sx={{
                       color: "#111827",
                       border: "1px solid rgba(17, 24, 39, 0.22)",
