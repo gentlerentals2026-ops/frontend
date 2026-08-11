@@ -98,27 +98,32 @@ export default function ProductPage() {
             <Grid
               item
               key={`home-skeleton-${item}`}
-              xs={6}
+              xs={12}
+              sm={6}
               md={4}
               lg={3}
               sx={{ display: "flex", justifyContent: "center" }}
             >
               <Card
                 sx={{
-                  width: 350,
-                  height: 380,
+                  width: "100%",
+                  maxWidth: 350,
                   borderRadius: 3,
                   boxShadow: 3,
                   display: "flex",
                   flexDirection: "column"
                 }}
               >
-                <Skeleton variant="rectangular" sx={{ height: 200 }} />
-                <CardContent sx={{ textAlign: "center", minHeight: 80 }}>
+                <Skeleton variant="rectangular" sx={{ height: { xs: 220, sm: 200 } }} />
+                <CardContent sx={{ textAlign: "center", minHeight: 96, pb: 1 }}>
                   <Skeleton variant="text" sx={{ fontSize: "1.2rem", mx: "auto", width: "72%" }} />
                   <Skeleton variant="text" sx={{ fontSize: "1rem", mx: "auto", width: "38%" }} />
                 </CardContent>
-                <Skeleton variant="rectangular" sx={{ mt: "auto", height: 49, borderRadius: 0 }} />
+                <Stack spacing={1} sx={{ p: 1.5, pt: 0, mt: "auto" }}>
+                  <Skeleton variant="rounded" sx={{ height: 42, borderRadius: 2 }} />
+                  <Skeleton variant="rounded" sx={{ height: 42, borderRadius: 2 }} />
+                  <Skeleton variant="rounded" sx={{ height: 42, borderRadius: 2 }} />
+                </Stack>
               </Card>
             </Grid>
           ))}
@@ -127,19 +132,21 @@ export default function ProductPage() {
           <Grid
             item
             key={item._id}
-            xs={6}
+            xs={12}
+            sm={6}
             md={4}
             lg={3}
             sx={{ display: "flex", justifyContent: "center" }}
           >
             <Card
               sx={{
-                width: 350,
-                height: 380,
+                width: "100%",
+                maxWidth: 350,
                 borderRadius: 3,
                 boxShadow: 3,
                 display: "flex",
                 flexDirection: "column",
+                overflow: "hidden"
               }}
             >
               <CardMedia
@@ -147,26 +154,27 @@ export default function ProductPage() {
                 image={item.imageUrl}
                 alt={item.title}
                 sx={{
-                  height: 200,
-                  objectFit: "cover",
+                  height: { xs: 220, sm: 200 },
+                  objectFit: "cover"
                 }}
               />
 
               <CardContent
                 sx={{
                   textAlign: "center",
-                  minHeight: 80,
+                  minHeight: 96,
+                  pb: 1
                 }}
               >
-                <Typography sx={{ fontWeight: 600, fontSize: "1rem" }}>
+                <Typography sx={{ fontWeight: 700, fontSize: "1rem", lineHeight: 1.4 }}>
                   {item.title}
                 </Typography>
-                <Typography sx={{ mt: 1, color: "gray", fontWeight: 500 }}>
+                <Typography sx={{ mt: 1, color: "gray", fontWeight: 600 }}>
                   ₦{formatPrice(item.price)}
                 </Typography>
               </CardContent>
 
-              <Stack spacing={1} sx={{ mt: "auto", p: 1.5 }}>
+              <Stack spacing={1} sx={{ mt: "auto", p: 1.5, pt: 0, pb: 1.5 }}>
                 <Button
                   component={RouterLink}
                   to={`/products/${item.slug}`}
@@ -175,7 +183,7 @@ export default function ProductPage() {
                   sx={{
                     backgroundColor: siteSettings.addToCartColor,
                     color: "white",
-                    py: 1.1,
+                    py: 1.15,
                     "&:hover": { backgroundColor: siteSettings.addToCartColor }
                   }}
                 >
@@ -190,7 +198,7 @@ export default function ProductPage() {
                     borderColor: siteSettings.addToCartColor,
                     color: siteSettings.addToCartColor,
                     backgroundColor: "#ffffff",
-                    py: 1.1,
+                    py: 1.15,
                     "&:hover": {
                       borderColor: siteSettings.addToCartColor,
                       color: siteSettings.addToCartColor,
@@ -206,7 +214,7 @@ export default function ProductPage() {
                   onClick={() => handleOrderNow(item)}
                   sx={{
                     backgroundColor: "#111827",
-                    py: 1.1,
+                    py: 1.15,
                     "&:hover": { backgroundColor: "#111827" }
                   }}
                 >

@@ -19,7 +19,9 @@ const WhatsAppFloat = () => {
         justifyContent: "center",
         alignItems: "center",
         fontSize: "28px",
-        zIndex: 9999,
+        zIndex: 1200,
+        insetBlockEnd: "calc(20px + env(safe-area-inset-bottom))",
+        insetInlineEnd: "calc(20px + env(safe-area-inset-right))",
         boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
         textDecoration: "none",
       }}
