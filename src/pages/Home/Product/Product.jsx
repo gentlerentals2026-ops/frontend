@@ -130,7 +130,7 @@ export default function ProductPage() {
           ))}
 
         {displayedProducts.map((item) => (
-            <Grid
+          <Grid
             item
             key={item._id}
             xs={12}
@@ -175,8 +175,9 @@ export default function ProductPage() {
               <CardContent
                 sx={{
                   textAlign: "center",
-                  minHeight: 96,
-                  pb: 1
+                  minHeight: 104,
+                  px: 2,
+                  py: 1.75
                 }}
               >
                 <Typography sx={{ fontWeight: 700, fontSize: "1rem", lineHeight: 1.4 }}>
@@ -187,7 +188,7 @@ export default function ProductPage() {
                 </Typography>
               </CardContent>
 
-              <Stack spacing={1} sx={{ mt: "auto", p: 1.5, pt: 0, pb: 1.5 }}>
+              <Stack spacing={0.9} sx={{ mt: "auto", px: 2, pb: 2, pt: 0 }}>
                 <Button
                   component={RouterLink}
                   to={`/products/${item.slug}`}
