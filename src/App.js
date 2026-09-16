@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import { Box, Toolbar } from "@mui/material";
+import { Box } from "@mui/material";
 import AppHeader from "./components/Header/Header";
 import Home from "./pages/Home/Home";
 import Footer from "./components/Footer/Footer";
@@ -22,7 +22,6 @@ const  App = ()=> {
     <div>
       <ScrollToTop />
       <AppHeader />
-      <Toolbar sx={{ minHeight: { xs: 104, md: 112 } }} />
       <Box
  
       >

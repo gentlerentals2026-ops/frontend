@@ -1,20 +1,11 @@
-import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Badge from '@mui/material/Badge';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
-import Container from '@mui/material/Container';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import DeckIcon from '@mui/icons-material/Deck';
-import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
-import { Link as RouterLink } from "react-router-dom";
+import * as React from "react";
+import { Badge, Box, Button, Container, IconButton, Menu, MenuItem } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import SearchIcon from "@mui/icons-material/Search";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import { Link as RouterLink, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AuthService } from "../../services/auth/Auth";
 import { setAccessToken, setIsAuthenticated, setUser } from "../../Redux/Reducers/appState";
@@ -22,35 +13,59 @@ import { cartApi, useGetCartQuery } from "../../services/api/cartApi";
 import { useSiteSettings } from "../../context/SiteSettingsContext";
 import { ProductService } from "../../services/products/Product";
 import { downloadBrochurePdf } from "../../utils/brochure";
+import "./Header.css";
 
 const pages = [
-  { label: "HOME", path: "/" },
-  { label: "PRODUCTS", path: "/products" },
-  { label: "ABOUT", path: "/about" },
-  { label: "CONTACT", path: "/contact" },
-  { label: "ACCOUNT", path: "/account" },
-  { label: "CART", path: "/cart" }
+  { label: "Home", path: "/" },
+  { label: "Rentals", path: "/products" },
+  { label: "Services", path: "/#services" },
+  { label: "About", path: "/about" },
+  { label: "Contact", path: "/contact" },
+  { label: "Account", path: "/account" },
+  { label: "Cart", path: "/cart" }
 ];
 
 const AppHeader = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated, user } = useSelector((state) => state.appState);
   const { siteSettings } = useSiteSettings();
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [isPreparingBrochure, setIsPreparingBrochure] = React.useState(false);
+  const [search, setSearch] = React.useState("");
+  const [rentalsAnchor, setRentalsAnchor] = React.useState(null);
+  const [categories, setCategories] = React.useState([]);
+  const [categoryStatus, setCategoryStatus] = React.useState("idle");
+  const headerRef = React.useRef(null);
+  const [headerHeight, setHeaderHeight] = React.useState(0);
   const { data: cartResponse } = useGetCartQuery(undefined, { skip: !isAuthenticated });
   const items = cartResponse?.data?.items || [];
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget);
-  };
-
-  const handleCloseNavMenu = () => {
+  React.useEffect(() => {
+    setSearch(new URLSearchParams(location.search).get("q") || "");
     setAnchorElNav(null);
-  };
+    setRentalsAnchor(null);
+  }, [location.pathname, location.search, location.hash]);
+
+  React.useLayoutEffect(() => {
+    const measure = () => setHeaderHeight(headerRef.current.getBoundingClientRect().height);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(headerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  React.useEffect(() => {
+    if (location.pathname === "/" && location.hash === "#services") {
+      const section = document.getElementById("services");
+      if (section) window.scrollTo({ top: section.getBoundingClientRect().top + window.scrollY - headerHeight - 16 });
+    }
+  }, [location.pathname, location.hash, headerHeight]);
 
   const handleLogout = async () => {
+    setAnchorElNav(null);
     try {
       await AuthService.logout();
     } catch (error) {
@@ -68,253 +83,91 @@ const AppHeader = () => {
       window.open(siteSettings.brochureUrl, "_blank", "noopener,noreferrer");
       return;
     }
-
     try {
       setIsPreparingBrochure(true);
       const response = await ProductService.getProducts();
-      downloadBrochurePdf({
-        siteSettings,
-        products: response?.data || []
-      });
+      downloadBrochurePdf({ siteSettings, products: response?.data || [] });
     } catch (error) {
       console.error("Unable to prepare brochure:", error);
-      downloadBrochurePdf({
-        siteSettings,
-        products: []
-      });
+      downloadBrochurePdf({ siteSettings, products: [] });
     } finally {
       setIsPreparingBrochure(false);
     }
   };
 
+  const submitSearch = (event) => {
+    event.preventDefault();
+    const query = search.trim();
+    navigate(query ? `/products?${new URLSearchParams({ q: query })}` : "/products");
+  };
+
+  const openRentals = async (event) => {
+    const trigger = event.currentTarget;
+    setRentalsAnchor((current) => current || trigger);
+    if (categoryStatus === "loaded" || categoryStatus === "loading") return;
+    setCategoryStatus("loading");
+    try {
+      const response = await ProductService.getProducts();
+      setCategories([...new Set((response.data || []).map((product) => product.category).filter(Boolean))].sort());
+      setCategoryStatus("loaded");
+    } catch {
+      setCategoryStatus("error");
+    }
+  };
+
   return (
-    <AppBar
-      position="fixed"
-      sx={{
-        backgroundColor: siteSettings.topBarColor,
-        top: 0,
-        left: 0,
-        right: 0,
-      }}
-    >
-      <Box
-        sx={{
-          borderBottom: "1px solid rgba(255,255,255,0.18)",
-          backgroundColor: "rgba(0,0,0,0.14)"
-        }}
-      >
+    <>
+      <Box component="header" ref={headerRef} className="customer-header" style={{ "--header-brand": siteSettings.topBarColor }}>
         <Container maxWidth="xl">
-          <Box
-            sx={{
-              minHeight: 40,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 2,
-              py: 0.75,
-              flexWrap: "wrap"
-            }}
-          >
-            <Typography sx={{ color: "white", fontSize: { xs: "0.82rem", md: "0.92rem" }, fontWeight: 600 }}>
-              Download our brochure for a quick look at our rental collection.
-            </Typography>
-            <Button
-              startIcon={<DownloadRoundedIcon />}
-              variant="contained"
-              size="small"
-              onClick={handleDownloadBrochure}
-              disabled={isPreparingBrochure}
-              sx={{
-                backgroundColor: "white",
-                color: siteSettings.topBarColor,
-                px: 2,
-                fontWeight: 700,
-                whiteSpace: "nowrap",
-                "&:hover": {
-                  backgroundColor: "rgba(255,255,255,0.92)"
-                }
-              }}
-            >
-              {isPreparingBrochure ? "Preparing Brochure..." : "Download Our Brochure"}
-            </Button>
-          </Box>
-        </Container>
-      </Box>
-
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-
-          {/* Desktop Logo */}
-          {siteSettings.logoUrl ? (
-            <Box
-              component={RouterLink}
-              to="/"
-              sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", mr: 3 }}
-            >
-              <Box component="img" src={siteSettings.logoUrl} alt={siteSettings.siteName} sx={{ height: 42, width: "auto" }} />
-            </Box>
-          ) : (
-            <>
-              <DeckIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
-              <Typography
-                component={RouterLink}
-                to="/"
-                variant="h6"
-                noWrap
-                sx={{
-                  mr: 4,
-                  display: { xs: 'none', md: 'flex' },
-                  fontFamily: 'Montserrat',
-                  fontWeight: 700,
-                  letterSpacing: '.2rem',
-                  color: 'white',
-                  textDecoration: 'none',
-                }}
-              >
-                {siteSettings.siteName || "G-Rentals"}
-              </Typography>
-            </>
-          )}
-
-          {/* Mobile Hamburger Menu */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size="large"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
+          <div className="customer-header__brand-row">
+            <RouterLink to="/" className="customer-header__logo" aria-label={`${siteSettings.siteName || "Gentle Events"} home`}>
+              {siteSettings.logoUrl ? <img src={siteSettings.logoUrl} alt={siteSettings.siteName || "Gentle Events"} /> : <span>{siteSettings.siteName || "Gentle Events"}</span>}
+            </RouterLink>
+            <div className="customer-header__account">
+              <RouterLink to="/account">{isAuthenticated ? user?.fullName?.split(" ")[0] || "Account" : "Account"}</RouterLink>
+              {isAuthenticated && <Button onClick={handleLogout} color="inherit">Logout</Button>}
+            </div>
+            <IconButton component={RouterLink} to="/cart" aria-label={`View cart, ${cartCount} items`} sx={{ color: "#171717", width: 48, height: 48, flexShrink: 0 }}>
+              <Badge badgeContent={cartCount} showZero color="error" max={999}><ShoppingCartIcon sx={{ fontSize: 30 }} /></Badge>
             </IconButton>
-
-            {/* Mobile Dropdown Menu */}
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              PaperProps={{
-                sx: {
-                  width: '250px',   // 📌 wider mobile dropdown
-                  backgroundColor: '#111',
-                  color: 'white',
-                },
-              }}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-            >
-              {pages.map((page) => (
-                <MenuItem
-                  key={page.label}
-                  component={RouterLink}
-                  to={page.path}
-                  onClick={handleCloseNavMenu}
-                >
-                  <Typography sx={{ textAlign: 'left' }}>
-                    {page.label}
-                  </Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-
-          {/* Mobile Logo */}
-          {siteSettings.logoUrl ? (
-            <Box
-              component={RouterLink}
-              to="/"
-              sx={{ display: { xs: "flex", md: "none" }, alignItems: "center", flexGrow: 1 }}
-            >
-              <Box component="img" src={siteSettings.logoUrl} alt={siteSettings.siteName} sx={{ height: 36, width: "auto" }} />
-            </Box>
-          ) : (
-            <>
-              <DeckIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
-              <Typography
-                component={RouterLink}
-                to="/"
-                variant="h5"
-                noWrap
-                sx={{
-                  mr: 2,
-                  display: { xs: 'flex', md: 'none' },
-                  flexGrow: 1,
-                  fontFamily: 'Montserrat',
-                  fontWeight: 700,
-                  letterSpacing: '.2rem',
-                  color: 'white',
-                  textDecoration: 'none',
-                }}
-              >
-               {siteSettings.siteName?.toUpperCase() || "G-RENTALS"}
-              </Typography>
-            </>
-          )}
-
-          {/* Desktop Menu Items */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page) => (
-              <Button
-                key={page.label}
-                component={RouterLink}
-                to={page.path}
-                onClick={handleCloseNavMenu}
-                sx={{
-                  my: 2,
-                  color: 'white',
-                  display: 'block',
-                  fontSize: '16px',
-                  px: 3,              // 📌 wider spacing
-                }}
-              >
-                {page.label}
-              </Button>
-            ))}
-          </Box>
-
-          {/* User Avatar Menu */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Tooltip title="View cart">
-              <IconButton component={RouterLink} to="/cart" color="inherit">
-                <Badge badgeContent={cartCount} color="error">
-                  <ShoppingCartIcon sx={{ color: "white" }} />
-                </Badge>
-              </IconButton>
-            </Tooltip>
-
-            <Button
-              component={RouterLink}
-              to="/account"
-              sx={{ color: "white", display: { xs: "none", md: "inline-flex" } }}
-            >
-              {isAuthenticated ? user?.fullName?.split(" ")[0] || "Account" : "Account"}
-            </Button>
-
-            {isAuthenticated && (
-              <Button
-                variant="outlined"
-                onClick={handleLogout}
-                sx={{
-                  color: "white",
-                  borderColor: "rgba(255,255,255,0.55)",
-                  display: { xs: "none", md: "inline-flex" },
-                  "&:hover": { borderColor: "white" }
-                }}
-              >
-                Logout
-              </Button>
+          </div>
+          <form role="search" aria-label="Catalogue" className="customer-header__search" onSubmit={submitSearch}>
+            <SearchIcon aria-hidden="true" />
+            <input type="search" aria-label="Search catalogue" placeholder="Search catalogue" enterKeyHint="search" value={search} onChange={(event) => setSearch(event.target.value)} />
+            <button type="submit">Search</button>
+          </form>
+          <nav className="customer-header__nav" aria-label="Main navigation">
+            <IconButton id="navigation-toggle" aria-label="Open navigation menu" aria-controls={anchorElNav ? "customer-navigation" : undefined} aria-haspopup="true" aria-expanded={Boolean(anchorElNav)} onClick={(event) => setAnchorElNav(event.currentTarget)} sx={{ color: "inherit", width: 44, height: 44, flexShrink: 0 }}><MenuIcon /></IconButton>
+            {pages.slice(0, 4).map((page) => page.label === "Rentals" ?
+              <div key={page.label} className="customer-header__rentals">
+                <NavLink to="/products">Rentals</NavLink>
+                <IconButton id="rentals-toggle" aria-label="Rental categories" aria-haspopup="true" aria-expanded={Boolean(rentalsAnchor)} aria-controls={rentalsAnchor ? "rental-categories" : undefined} onClick={openRentals} size="small" color="inherit"><ExpandMoreIcon fontSize="small" /></IconButton>
+              </div> : page.label === "Services" ?
+              <RouterLink key={page.label} to={page.path}>{page.label}</RouterLink> :
+              <NavLink key={page.label} to={page.path} end={page.path === "/"}>{page.label}</NavLink>
             )}
-          </Box>
-
-        </Toolbar>
-      </Container>
-    </AppBar>
+            <RouterLink to="/contact" className="customer-header__contact">Contact</RouterLink>
+          </nav>
+          <div className="customer-header__brochure">
+            <span>Explore our rental collection</span>
+            <Button onClick={handleDownloadBrochure} disabled={isPreparingBrochure} startIcon={<DownloadRoundedIcon />} color="inherit" size="small">{isPreparingBrochure ? "Preparing Brochure..." : "Download Our Brochure"}</Button>
+          </div>
+        </Container>
+        <Menu id="rental-categories" anchorEl={rentalsAnchor} open={Boolean(rentalsAnchor)} onClose={() => setRentalsAnchor(null)} MenuListProps={{ "aria-labelledby": "rentals-toggle" }} PaperProps={{ sx: { maxWidth: "calc(100vw - 32px)", bgcolor: "#fff", color: "#171717" } }}>
+          <MenuItem component={RouterLink} to="/products" onClick={() => setRentalsAnchor(null)}>All rentals</MenuItem>
+          {categoryStatus === "loading" && <MenuItem disabled>Loading categories...</MenuItem>}
+          {categoryStatus === "error" && <MenuItem onClick={openRentals}>Unable to load categories. Retry</MenuItem>}
+          {categories.map((category) => <MenuItem key={category} component={RouterLink} to={`/products?${new URLSearchParams({ category })}`} onClick={() => setRentalsAnchor(null)} sx={{ whiteSpace: "normal", overflowWrap: "anywhere" }}>{category}</MenuItem>)}
+        </Menu>
+        <Menu id="customer-navigation" anchorEl={anchorElNav} open={Boolean(anchorElNav)} onClose={() => setAnchorElNav(null)} MenuListProps={{ "aria-labelledby": "navigation-toggle" }} PaperProps={{ sx: { width: 250, maxWidth: "calc(100vw - 32px)", bgcolor: "#fff", color: "#171717" } }}>
+          {pages.map((page) => <MenuItem key={page.label} component={RouterLink} to={page.path} onClick={() => setAnchorElNav(null)}>{page.label}</MenuItem>)}
+          {isAuthenticated && <MenuItem onClick={handleLogout}>Logout</MenuItem>}
+        </Menu>
+      </Box>
+      {/* Match the actual header height, including loaded logos and wrapped text. */}
+      <div aria-hidden="true" style={{ height: headerHeight }} />
+    </>
   );
-}
+};
 
 export default AppHeader;

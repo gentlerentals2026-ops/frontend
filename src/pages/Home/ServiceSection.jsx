@@ -7,6 +7,7 @@ import ShieldIcon from "@mui/icons-material/Shield";
 export default function ServicesSection() {
   return (
     <Box
+      id="services"
       sx={{
         width: "100%",
         backgroundColor: "#e9f1f2",

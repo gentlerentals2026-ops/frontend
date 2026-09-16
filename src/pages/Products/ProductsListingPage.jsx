@@ -1,7 +1,7 @@
 import { Alert, Box, Button, Card, CardContent, Chip, Grid, IconButton, Rating, Skeleton, Stack, TextField, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { ProductService } from "../../services/products/Product";
@@ -14,6 +14,9 @@ const orderNowKey = "gentle_events_order_now";
 
 const ProductsListingPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const query = (searchParams.get("q") || "").trim().toLocaleLowerCase();
+  const category = searchParams.get("category") || "";
   const { isAuthenticated } = useSelector((state) => state.appState);
   const { siteSettings } = useSiteSettings();
   const [addToCart, { isLoading: isAdding }] = useAddToCartMutation();
@@ -22,6 +25,10 @@ const ProductsListingPage = () => {
   const [error, setError] = useState("");
   const [cartMessage, setCartMessage] = useState("");
   const [selectedQuantities, setSelectedQuantities] = useState({});
+  const displayedProducts = products.filter((product) =>
+    `${product.title || ""} ${product.description || ""}`.toLocaleLowerCase().includes(query) &&
+    (!category || product.category === category)
+  );
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -99,9 +106,9 @@ const ProductsListingPage = () => {
         </Typography>
       )}
 
-      {!isLoading && !error && products.length === 0 && (
+      {!isLoading && !error && displayedProducts.length === 0 && (
         <Typography sx={{ textAlign: "center", color: "text.secondary" }}>
-          No listings available yet.
+          {query || category ? "No listings match your search." : "No listings available yet."}
         </Typography>
       )}
 
@@ -151,7 +158,7 @@ const ProductsListingPage = () => {
             </Grid>
           ))}
 
-        {products.map((product) => (
+        {displayedProducts.map((product) => (
           <Grid item xs={12} sm={6} lg={4} key={product._id} sx={{ display: "flex", justifyContent: "center" }}>
             <Card
               sx={{
