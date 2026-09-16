@@ -39,6 +39,8 @@ const AppHeader = () => {
   const [categoryStatus, setCategoryStatus] = React.useState("idle");
   const headerRef = React.useRef(null);
   const [headerHeight, setHeaderHeight] = React.useState(0);
+  const [navBounds, setNavBounds] = React.useState({ top: 0, bottom: 0 });
+  const [isHeaderCollapsed, setIsHeaderCollapsed] = React.useState(false);
   const { data: cartResponse } = useGetCartQuery(undefined, { skip: !isAuthenticated });
   const items = cartResponse?.data?.items || [];
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -50,11 +52,34 @@ const AppHeader = () => {
   }, [location.pathname, location.search, location.hash]);
 
   React.useLayoutEffect(() => {
-    const measure = () => setHeaderHeight(headerRef.current.getBoundingClientRect().height);
+    const measure = () => {
+      const header = headerRef.current.getBoundingClientRect();
+      const nav = headerRef.current.querySelector("nav").getBoundingClientRect();
+      setHeaderHeight(header.height);
+      setNavBounds({ top: nav.top - header.top, bottom: header.bottom - nav.bottom });
+    };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(headerRef.current);
     return () => observer.disconnect();
+  }, []);
+
+  React.useEffect(() => {
+    let collapsed = false;
+    const onScroll = () => {
+      const next = collapsed ? window.scrollY > 50 : window.scrollY >= 100;
+      if (next === collapsed) return;
+      collapsed = next;
+      setIsHeaderCollapsed(next);
+      setAnchorElNav(null);
+      setRentalsAnchor(null);
+      if (next && document.activeElement?.closest("[data-header-expanded]")) {
+        document.activeElement.blur();
+      }
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   React.useEffect(() => {
@@ -117,9 +142,9 @@ const AppHeader = () => {
 
   return (
     <>
-      <Box component="header" ref={headerRef} className="customer-header" style={{ "--header-brand": siteSettings.topBarColor }}>
+      <Box component="header" ref={headerRef} className={`customer-header${isHeaderCollapsed ? " customer-header--collapsed" : ""}`} style={{ "--header-brand": siteSettings.topBarColor, "--nav-top": `${navBounds.top}px`, "--nav-bottom": `${navBounds.bottom}px` }}>
         <Container maxWidth="xl">
-          <div className="customer-header__brand-row">
+          <div className="customer-header__brand-row" data-header-expanded inert={isHeaderCollapsed} aria-hidden={isHeaderCollapsed || undefined}>
             <RouterLink to="/" className="customer-header__logo" aria-label={`${siteSettings.siteName || "Gentle Events"} home`}>
               {siteSettings.logoUrl ? <img src={siteSettings.logoUrl} alt={siteSettings.siteName || "Gentle Events"} /> : <span>{siteSettings.siteName || "Gentle Events"}</span>}
             </RouterLink>
@@ -131,7 +156,7 @@ const AppHeader = () => {
               <Badge badgeContent={cartCount} showZero color="error" max={999}><ShoppingCartIcon sx={{ fontSize: 30 }} /></Badge>
             </IconButton>
           </div>
-          <form role="search" aria-label="Catalogue" className="customer-header__search" onSubmit={submitSearch}>
+          <form role="search" aria-label="Catalogue" className="customer-header__search" onSubmit={submitSearch} data-header-expanded inert={isHeaderCollapsed} aria-hidden={isHeaderCollapsed || undefined}>
             <SearchIcon aria-hidden="true" />
             <input type="search" aria-label="Search catalogue" placeholder="Search catalogue" enterKeyHint="search" value={search} onChange={(event) => setSearch(event.target.value)} />
             <button type="submit">Search</button>
@@ -148,7 +173,7 @@ const AppHeader = () => {
             )}
             <RouterLink to="/contact" className="customer-header__contact">Contact</RouterLink>
           </nav>
-          <div className="customer-header__brochure">
+          <div className="customer-header__brochure" data-header-expanded inert={isHeaderCollapsed} aria-hidden={isHeaderCollapsed || undefined}>
             <span>Explore our rental collection</span>
             <Button onClick={handleDownloadBrochure} disabled={isPreparingBrochure} startIcon={<DownloadRoundedIcon />} color="inherit" size="small">{isPreparingBrochure ? "Preparing Brochure..." : "Download Our Brochure"}</Button>
           </div>
@@ -164,7 +189,7 @@ const AppHeader = () => {
           {isAuthenticated && <MenuItem onClick={handleLogout}>Logout</MenuItem>}
         </Menu>
       </Box>
-      {/* Match the actual header height, including loaded logos and wrapped text. */}
+      {/* Keep the full-height spacer during collapse so content and scroll position never shift. */}
       <div aria-hidden="true" style={{ height: headerHeight }} />
     </>
   );

@@ -7,6 +7,17 @@
   border-top: 4px solid var(--header-brand);
   box-shadow: 0 3px 18px #0000000d;
   font-family: inherit;
+  transition: transform 250ms ease, clip-path 250ms ease;
+  clip-path: inset(0 -24px -24px);
+}
+.customer-header--collapsed {
+  transform: translateY(calc(-1 * var(--nav-top)));
+  clip-path: inset(var(--nav-top) 0 var(--nav-bottom) 0);
+}
+.customer-header [data-header-expanded] { transition: opacity 250ms ease; }
+.customer-header--collapsed [data-header-expanded] { opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) {
+  .customer-header, .customer-header [data-header-expanded] { transition: none; }
 }
 .customer-header *, .customer-header *::before, .customer-header *::after { box-sizing: border-box; }
 .customer-header__brand-row { display: flex; align-items: center; gap: 20px; padding: 18px 0; }

@@ -45,10 +45,53 @@ function TestApp() {
   </MemoryRouter>;
 }
 beforeEach(() => {
+  Object.defineProperty(window, "scrollY", { configurable: true, value: 0, writable: true });
   mockCartItems = [{ quantity: 2 }, { quantity: 1 }];
   ProductService.getProducts.mockResolvedValue({ data: products });
   mockAddToCart.mockReturnValue({ unwrap: () => Promise.resolve() });
   window.ResizeObserver = class { observe() {} disconnect() {} };
+});
+
+test("scroll collapse uses hysteresis and restores existing controls", async () => {
+  render(<TestApp />);
+  await screen.findByText("Gold Chiavari Chair");
+  const header = screen.getByRole("banner");
+  const scroll = (y) => {
+    window.scrollY = y;
+    fireEvent.scroll(window);
+  };
+  scroll(99);
+  expect(header).not.toHaveClass("customer-header--collapsed");
+  scroll(100);
+  expect(header).toHaveClass("customer-header--collapsed");
+  expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
+  expect(screen.getByRole("search", { hidden: true })).toHaveAttribute("inert");
+  expect(screen.getByRole("navigation")).toBeInTheDocument();
+  for (const y of [101, 98, 80, 51, 600]) {
+    scroll(y);
+    expect(header).toHaveClass("customer-header--collapsed");
+  }
+  scroll(50);
+  expect(header).not.toHaveClass("customer-header--collapsed");
+  expect(screen.getByRole("searchbox")).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "View cart, 3 items" })).toBeInTheDocument();
+  scroll(80);
+  expect(header).not.toHaveClass("customer-header--collapsed");
+});
+
+test("restored scroll positions collapse on mount and the passive listener is cleaned up", async () => {
+  window.scrollY = 250;
+  const add = jest.spyOn(window, "addEventListener");
+  const remove = jest.spyOn(window, "removeEventListener");
+  const view = render(<TestApp />);
+  await screen.findByText("Gold Chiavari Chair");
+  expect(screen.getByRole("banner")).toHaveClass("customer-header--collapsed");
+  const registration = add.mock.calls.find(([name, , options]) => name === "scroll" && options?.passive);
+  expect(registration).toBeDefined();
+  view.unmount();
+  expect(remove).toHaveBeenCalledWith("scroll", registration[1]);
+  add.mockRestore();
+  remove.mockRestore();
 });
 
 test("search button and Enter use the existing listings with partial, case-insensitive, empty and unmatched queries", async () => {
