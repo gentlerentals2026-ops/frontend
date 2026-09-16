@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import AppHeader from "./Header";
 import ProductsListingPage from "../../pages/Products/ProductsListingPage";
+import ProductDetailsPage from "../../pages/Products/ProductDetailsPage";
 import { ProductService } from "../../services/products/Product";
 
 jest.setTimeout(30000);
@@ -26,7 +27,7 @@ jest.mock("../../services/api/cartApi", () => ({
 jest.mock("../../context/SiteSettingsContext", () => ({
   useSiteSettings: () => ({ siteSettings: { siteName: "Gentle Events", logoUrl: "/logo.png", topBarColor: "#f59e0b", addToCartColor: "#f59e0b" } })
 }));
-jest.mock("../../services/products/Product", () => ({ ProductService: { getProducts: jest.fn() } }));
+jest.mock("../../services/products/Product", () => ({ ProductService: { getProducts: jest.fn(), getProductBySlug: jest.fn() } }));
 jest.mock("../../services/auth/Auth", () => ({ AuthService: { logout: jest.fn() } }));
 jest.mock("../../utils/brochure", () => ({ downloadBrochurePdf: jest.fn() }));
 
@@ -41,13 +42,14 @@ function Location() {
 function TestApp() {
   return <MemoryRouter initialEntries={["/products"]}>
     <AppHeader /><Location />
-    <Routes><Route path="/products" element={<ProductsListingPage />} /><Route path="*" element={<div>Destination</div>} /></Routes>
+    <Routes><Route path="/products" element={<ProductsListingPage />} /><Route path="/products/:slug" element={<ProductDetailsPage />} /><Route path="*" element={<div>Destination</div>} /></Routes>
   </MemoryRouter>;
 }
 beforeEach(() => {
   Object.defineProperty(window, "scrollY", { configurable: true, value: 0, writable: true });
   mockCartItems = [{ quantity: 2 }, { quantity: 1 }];
   ProductService.getProducts.mockResolvedValue({ data: products });
+  ProductService.getProductBySlug.mockResolvedValue({ data: products[0] });
   mockAddToCart.mockReturnValue({ unwrap: () => Promise.resolve() });
   window.ResizeObserver = class { observe() {} disconnect() {} };
 });
@@ -150,12 +152,15 @@ test("Rentals uses real product categories and filters listings", async () => {
   expect(screen.getByTestId("location")).toHaveTextContent("/products?category=Chairs");
 });
 
-test("filtered cards preserve View Listing, Add to Cart and Order Now quotation handoff", async () => {
+test("filtered catalogue tiles lead to existing detail actions and Order Now quotation handoff", async () => {
   render(<TestApp />);
   await screen.findByText("Gold Chiavari Chair");
   fireEvent.change(screen.getByRole("searchbox"), { target: { value: "Gold" } });
   await enter(screen.getByRole("searchbox"));
-  expect(screen.getByRole("link", { name: "View Listing" })).toHaveAttribute("href", "/products/gold-chair");
+  const listing = screen.getByRole("link", { name: "View listing: Gold Chiavari Chair" });
+  expect(listing).toHaveAttribute("href", "/products/gold-chair");
+  await click(listing);
+  await screen.findByRole("button", { name: "Add to Cart" });
   await click(screen.getByRole("button", { name: "Add to Cart" }));
   expect(mockAddToCart).toHaveBeenCalledWith({ productId: "chair", quantity: 1 });
   await screen.findByText("Gold Chiavari Chair added to cart.");

@@ -23,6 +23,7 @@ import { ProductService } from "../../services/products/Product";
 import { API } from "../../constant/apiConstant";
 import { useAddToCartMutation } from "../../services/api/cartApi";
 import { useSiteSettings } from "../../context/SiteSettingsContext";
+import CatalogueGrid from "../../components/Catalogue/CatalogueGrid";
 
 const formatPrice = (price) => Number(price || 0).toLocaleString("en-NG");
 const orderNowKey = "gentle_events_order_now";
@@ -594,35 +595,7 @@ const ProductDetailsPage = () => {
           <Typography variant="h4" sx={{ fontWeight: 800, mb: 2.5 }}>
             More Listings
           </Typography>
-          <Grid container spacing={3}>
-            {relatedProducts.map((item) => (
-              <Grid item xs={12} md={4} key={item._id}>
-                <Paper sx={{ p: 2, borderRadius: 3, height: "100%" }}>
-                  <Box
-                    component="img"
-                    src={item.imageUrl}
-                    alt={item.title}
-                    sx={{ width: "100%", height: 220, objectFit: "cover", borderRadius: 3, mb: 2 }}
-                  />
-                  <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>{item.title}</Typography>
-                  <Typography sx={{ color: "#d97706", fontWeight: 800, mb: 1 }}>
-                    ₦{formatPrice(item.price)}
-                  </Typography>
-                  <Button
-                    component={RouterLink}
-                    to={`/products/${item.slug}`}
-                    variant="contained"
-                    sx={{
-                      backgroundColor: siteSettings.addToCartColor,
-                      "&:hover": { backgroundColor: siteSettings.addToCartColor }
-                    }}
-                  >
-                    View Listing
-                  </Button>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
+          <CatalogueGrid products={relatedProducts} isLoading={false} />
         </Box>
       )}
     </Box>
