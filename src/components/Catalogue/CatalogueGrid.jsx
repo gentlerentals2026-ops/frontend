@@ -16,7 +16,7 @@ export default function CatalogueGrid({ products, isLoading, skeletonCount = 8 }
           <div className="catalogue-tile__image">
             {product.imageUrl ? <img src={product.imageUrl} alt="" loading="lazy" decoding="async" /> : <span>Image unavailable</span>}
           </div>
-          <h3 className="catalogue-tile__name">{product.title}</h3>
+          <h3 className="catalogue-tile__name" title={product.title}>{product.title}</h3>
           <p className="catalogue-tile__price">&#8358;{Number(product.price || 0).toLocaleString("en-NG")}</p>
         </Link>
       ))}
