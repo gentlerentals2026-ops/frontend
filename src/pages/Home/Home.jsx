@@ -1,6 +1,7 @@
 import Slider from "../../components/Slider/Slider";
 import ServicesSection from "./ServiceSection";
 import ProductPage from "./Product/Product";
+import RentalSteps from "./RentalSteps";
 const Home = ()=> {
 
   
@@ -9,6 +10,7 @@ const Home = ()=> {
     <div >
          <Slider />
          <ProductPage />
+         <RentalSteps />
          <ServicesSection />
  
       </div>

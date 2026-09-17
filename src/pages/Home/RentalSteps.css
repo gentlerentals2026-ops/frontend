@@ -1,0 +1,28 @@
+.rental-steps {
+  padding: 32px 16px;
+  color: #171717;
+  background: linear-gradient(135deg, #fffaf0, #fffdf8);
+  border-top: 1px solid #eee5d5;
+  border-bottom: 1px solid #eee5d5;
+}
+.rental-steps__inner { max-width: 1120px; margin-inline: auto; }
+.rental-steps h2 { margin: 0; text-align: center; font-size: 1.6rem; line-height: 1.25; }
+.rental-steps__subtitle { margin: 10px auto 24px; max-width: 460px; text-align: center; color: #616161; font-size: 14px; line-height: 1.5; }
+.rental-steps__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; margin: 0; padding: 0; list-style: none; }
+.rental-steps__step { min-width: 0; }
+.rental-steps__marker { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; color: #a85b00; }
+.rental-steps__marker svg { box-sizing: content-box; width: 24px; height: 24px; padding: 8px; border-radius: 4px; background: #fff0bf; }
+.rental-steps__marker span { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; }
+.rental-steps__step h3 { margin: 0 0 6px; font-size: 14px; line-height: 1.4; }
+.rental-steps__step p { margin: 0; color: #555; font-size: 13px; line-height: 1.5; }
+@media (min-width: 768px) {
+  .rental-steps { padding: 40px 24px; }
+  .rental-steps__grid { gap: 28px; }
+  .rental-steps h2 { font-size: 2rem; }
+  .rental-steps__step h3 { font-size: 16px; }
+  .rental-steps__step p { font-size: 14px; }
+}
+@media (min-width: 1024px) {
+  .rental-steps { padding: 48px 40px; }
+  .rental-steps__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
