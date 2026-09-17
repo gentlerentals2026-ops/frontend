@@ -1,0 +1,31 @@
+.service-benefits { padding: 32px 16px 80px; background: linear-gradient(135deg, #e9f1f2, #f5f8f8); color: #171717; scroll-margin-top: 70px; }
+.service-benefits__inner { max-width: 1120px; margin-inline: auto; }
+.service-benefits__intro { margin-bottom: 20px; }
+.service-benefits__eyebrow { margin: 0 0 6px; color: #67520f; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; }
+.service-benefits h2 { max-width: 480px; margin: 0; font-size: clamp(23px, 5.5vw, 32px); line-height: 1.18; }
+.service-benefits__description { max-width: 500px; margin: 12px 0 0; color: #444; font-size: 14px; line-height: 1.5; }
+.service-benefits__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 12px; padding: 0; margin: 0; list-style: none; }
+.service-benefits__item { min-width: 0; }
+.service-benefits__card { box-sizing: border-box; height: 100%; min-height: 126px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 14px 8px; border: 1px solid #dce4e2; border-radius: 8px; background: #fff; box-shadow: 0 2px 6px #17251c08; transition: border-color 180ms ease, box-shadow 180ms ease; }
+.service-benefits__card svg { flex-shrink: 0; box-sizing: content-box; width: 32px; height: 32px; padding: 5px; color: #a85b00; background: #fff5d5; border-radius: 8px; }
+.service-benefits__card h3 { margin: 0; min-height: 2.8em; display: flex; align-items: center; text-align: center; font-size: 13px; line-height: 1.4; font-weight: 600; overflow-wrap: anywhere; }
+@media (hover: hover) { .service-benefits__card:hover { border-color: #cbb978; box-shadow: 0 4px 12px #17251c10; } }
+.service-benefits__card:active { border-color: #a85b00; }
+@keyframes service-benefits-enter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: no-preference) {
+  .service-benefits--entered .service-benefits__intro { animation: service-benefits-enter 500ms ease both; }
+  .service-benefits--entered .service-benefits__item { animation: service-benefits-enter 550ms ease both; animation-delay: var(--benefit-delay); }
+}
+@media (prefers-reduced-motion: reduce) { .service-benefits__card { transition: none; } }
+@media (min-width: 768px) {
+  .service-benefits { padding: 40px 24px 80px; }
+  .service-benefits__grid { gap: 16px; }
+  .service-benefits__card { min-height: 140px; padding: 16px; }
+  .service-benefits__card h3 { font-size: 15px; }
+}
+@media (min-width: 1024px) {
+  .service-benefits { padding: 48px 40px 80px; }
+  .service-benefits__intro { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; margin-bottom: 24px; }
+  .service-benefits__description { margin: 0; }
+  .service-benefits__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
