@@ -9,6 +9,7 @@ jest.mock('./components/WhatsApp/whatsapp', () => () => <aside>WhatsApp</aside>)
 jest.mock('./components/ScrollToTop/ScrollToTop', () => () => null);
 jest.mock('./pages/Home/Home', () => () => <main>Home page</main>);
 jest.mock('./pages/Account/AccountPage', () => () => <main>Account page</main>);
+jest.mock('./pages/Account/ForgotPasswordPage', () => () => <main>Recovery page</main>);
 jest.mock('./pages/About/AboutPage', () => () => <main>About page</main>);
 jest.mock('./pages/Contact/ContactPage', () => () => <main>Contact page</main>);
 jest.mock('./pages/Info/FaqPage', () => () => <main>FAQ page</main>);
@@ -19,6 +20,7 @@ jest.mock('./pages/Cart/CartPage', () => () => <main>Cart page</main>);
 
 test.each([
   ['/', 'Home'], ['/account', 'Account'], ['/about', 'About'], ['/contact', 'Contact'],
+  ['/forgot-password', 'Recovery'],
   ['/faqs', 'FAQ'], ['/privacy-policy', 'privacy'], ['/cancellation-policy', 'cancellation'],
   ['/brochure', 'brochure'], ['/cart', 'Cart'], ['/generate-quotation', 'Cart'],
   ['/products', 'Listings'], ['/products/example', 'Details'], ['/unknown', 'Home']

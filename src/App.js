@@ -15,6 +15,7 @@ import PolicyPage from "./pages/Info/PolicyPage";
 import NotFoundPage from "./pages/NotFound/NotFoundPage";
 import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 import EmailPreferences from "./pages/Info/EmailPreferences";
+import ForgotPasswordPage from "./pages/Account/ForgotPasswordPage";
 const  App = ()=> {
 
   
@@ -30,6 +31,7 @@ const  App = ()=> {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/email-preferences" element={<EmailPreferences />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
