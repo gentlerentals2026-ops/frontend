@@ -1,151 +1,75 @@
-import React from "react";
-import { Box, Grid, Typography, TextField, Button, IconButton } from "@mui/material";
+import { useRef, useState } from "react";
 import { Facebook, Instagram, Twitter, MusicNote } from "@mui/icons-material";
-import { Link as RouterLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useSiteSettings } from "../../context/SiteSettingsContext";
+import { API } from "../../constant/apiConstant";
+import { getErrorMessage, parseJsonSafely } from "../../utils/http";
+import "./Footer.css";
 
-const Footer = () => {
-  const { siteSettings } = useSiteSettings();
-  const socialLinks = [
-    { key: "facebook", url: siteSettings.facebookUrl, icon: <Facebook /> },
-    { key: "instagram", url: siteSettings.instagramUrl, icon: <Instagram /> },
-    { key: "twitter", url: siteSettings.twitterUrl, icon: <Twitter /> },
-    { key: "tiktok", url: siteSettings.tiktokUrl, icon: <MusicNote /> }
-  ];
-
-  return (
-    <Box sx={{ backgroundColor: siteSettings.footerBackgroundColor || "#000000", color: "#bfc3d0", padding: "50px 20px 20px" }}>
-      <Grid
-        container
-        spacing={4}
-        sx={{
-          maxWidth: "1300px",
-          margin: "auto",
-        }}
-      >
-        {/* LEFT SECTION - LOGO + CONTACT */}
-        <Grid item xs={12} md={4}>
-          <img
-            src={siteSettings.logoUrl || "/logo.png"}
-            alt={`${siteSettings.siteName || "Gentle Rentals"} Logo`}
-            style={{ width: "140px", marginBottom: "10px" }}
-          />
-
-          <Typography sx={{ color: "#fff", fontStyle: "italic", mb: 2 }}>
-            "We've got your event(s) covered"
-          </Typography>
-
-          <Typography><strong>Phone:</strong> +2348148928379, +2348148928379</Typography>
-          <Typography><strong>Mail:</strong> gentlerentals@gmail.com</Typography>
-          <Typography>
-            <strong>Address:</strong> No 23 , Okuokuokor road off fresh ville road,Okpe Delta State
-          </Typography>
-        </Grid>
-
-        {/* USEFUL LINKS */}
-        <Grid item xs={12} sm={6} md={2}>
-          <Typography variant="h6" sx={{ color: "#fff", mb: 2 }}>
-            Useful Link
-          </Typography>
-          <Typography component={RouterLink} to="/" sx={{ mb: 1, display: "block", color: "inherit", textDecoration: "none" }}>Home</Typography>
-          <Typography component={RouterLink} to="/about" sx={{ mb: 1, display: "block", color: "inherit", textDecoration: "none" }}>About Us</Typography>
-          <Typography component={RouterLink} to="/contact" sx={{ mb: 1, display: "block", color: "inherit", textDecoration: "none" }}>Contact Us</Typography>
-          <Typography component={RouterLink} to="/products" sx={{ mb: 1, display: "block", color: "inherit", textDecoration: "none" }}>Equipments</Typography>
-        </Grid>
-
-        {/* COMMUNITY */}
-        <Grid item xs={12} sm={6} md={2}>
-          <Typography variant="h6" sx={{ color: "#fff", mb: 2 }}>
-            Community
-          </Typography>
-          <Typography component={RouterLink} to="/faqs" sx={{ mb: 1, display: "block", color: "inherit", textDecoration: "none" }}>FAQS</Typography>
-          <Typography component={RouterLink} to="/privacy-policy" sx={{ mb: 1, display: "block", color: "inherit", textDecoration: "none" }}>Privacy Policy</Typography>
-          <Typography component={RouterLink} to="/cancellation-policy" sx={{ mb: 1, display: "block", color: "inherit", textDecoration: "none" }}>Cancellation Policy</Typography>
-          <Typography component={RouterLink} to="/brochure" sx={{ mb: 1, display: "block", color: "inherit", textDecoration: "none" }}>Brochure</Typography>
-        </Grid>
-
-        {/* NEWSLETTER */}
-        <Grid item xs={12} md={4}>
-          <Typography variant="h6" sx={{ color: "#fff", mb: 2 }}>
-            Subscribe For Our Newsletters
-          </Typography>
-
-          {/* Input + Button Box */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              border: "1px solid #ff4a00",
-              borderRadius: "40px",
-              padding: "8px",
-              mb: 2,
-              flexDirection: { xs: "column", sm: "row" },
-              width: "100%",
-              gap: { xs: 1.5, sm: 0 },
-            }}
-          >
-            <TextField
-              placeholder="Your Email Address"
-              variant="standard"
-              InputProps={{
-                disableUnderline: true,
-                sx: {
-                  color: "#fff",
-                  px: 2,
-                },
-              }}
-              sx={{
-                flex: 1,
-                width: "100%",
-              }}
-            />
-
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: "#268cff",
-                borderRadius: "40px",
-                padding: "10px 25px",
-                width: { xs: "100%", sm: "auto" },
-                textAlign: "center",
-              }}
-            >
-              Subscribe
-            </Button>
-          </Box>
-
-          {/* SOCIAL ICONS */}
-          <Box sx={{ display: "flex", gap: 2 }}>
-            {socialLinks.map((item) => (
-              <IconButton
-                key={item.key}
-                component={item.url ? "a" : "button"}
-                href={item.url || undefined}
-                target={item.url ? "_blank" : undefined}
-                rel={item.url ? "noreferrer" : undefined}
-                disabled={!item.url}
-                sx={{ color: "#bfc3d0" }}
-              >
-                {item.icon}
-              </IconButton>
-            ))}
-          </Box>
-        </Grid>
-      </Grid>
-
-      {/* COPYRIGHT */}
-      <Typography
-        sx={{
-          textAlign: "center",
-          marginTop: "40px",
-          color: "#777",
-          fontSize: "14px",
-        }}
-      >
-        ©2026 {siteSettings.siteName || "Gentle Rentals Ventures"}. All Rights Reserved.
-      </Typography>
-    </Box>
-  );
+const quickLinks = [["Home", "/"], ["About Us", "/about"], ["Contact Us", "/contact"], ["Equipment", "/products"]];
+const helpLinks = [["FAQs", "/faqs"], ["Privacy Policy", "/privacy-policy"], ["Cancellation Policy", "/cancellation-policy"], ["Brochure", "/brochure"]];
+const safeSocialUrl = value => {
+  try { const url = new URL(value); return ["https:", "http:"].includes(url.protocol) ? url.href : ""; } catch { return ""; }
 };
 
-export default Footer;
+export default function Footer() {
+  const { siteSettings } = useSiteSettings();
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const socialLinks = [
+    { label: "Facebook", url: siteSettings.facebookUrl, Icon: Facebook },
+    { label: "Instagram", url: siteSettings.instagramUrl, Icon: Instagram },
+    { label: "X / Twitter", url: siteSettings.twitterUrl, Icon: Twitter },
+    { label: "TikTok", url: siteSettings.tiktokUrl, Icon: MusicNote }
+  ];
+  const subscribe = async event => {
+    event.preventDefault();
+    if (busyRef.current) return;
+    busyRef.current = true; setBusy(true); setMessage(""); setError("");
+    try {
+      const response = await fetch(`${API.BASE_URL}/api/newsletter/subscribe`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email.trim().toLowerCase() }) });
+      const payload = await parseJsonSafely(response);
+      if (!response.ok) throw new Error(getErrorMessage(response, payload, "Unable to subscribe. Please try again."));
+      setMessage("You're subscribed. Thank you for joining us!"); setEmail("");
+    } catch (error) { setError(error.message || "Unable to subscribe. Please try again."); }
+    finally { busyRef.current = false; setBusy(false); }
+  };
+  return <footer className="customer-footer" style={{ "--footer-brand": siteSettings.topBarColor, backgroundColor: siteSettings.footerBackgroundColor || "#000000" }}>
+    <div className="customer-footer__inner">
+      <div className="customer-footer__grid">
+        <div className="customer-footer__brand">
+          <img className="customer-footer__logo" src={siteSettings.logoUrl || "/logo.png"} alt={`${siteSettings.siteName || "Gentle Events"} logo`} loading="lazy" />
+          <p className="customer-footer__tagline">We've got your event(s) covered</p>
+          <address className="customer-footer__contact">
+            <div><span>Phone</span><a href="tel:+2348148928379">+2348148928379</a></div>
+            <div><span>Email</span><a href="mailto:gentlerentals@gmail.com">gentlerentals@gmail.com</a></div>
+            <div><span>Location</span><p>No 23 , Okuokuokor road off fresh ville road,Okpe Delta State</p></div>
+          </address>
+        </div>
+        <div className="customer-footer__links">
+          {[["Quick Links", quickLinks], ["Help & Info", helpLinks]].map(([title, links]) => <nav key={title} aria-label={`Footer ${title}`}><h2>{title}</h2><ul>{links.map(([label, to]) => <li key={to}><Link to={to}>{label}</Link></li>)}</ul></nav>)}
+        </div>
+        <section className="customer-footer__newsletter" aria-labelledby="footer-newsletter-heading">
+          <h2 id="footer-newsletter-heading">Stay in the Loop</h2>
+          <p>Get rental updates, new arrivals and event inspiration.</p>
+          <form onSubmit={subscribe} aria-label="Newsletter subscription" aria-busy={busy}>
+            <label htmlFor="footer-newsletter-email">Email address</label>
+            <input id="footer-newsletter-email" type="email" name="email" autoComplete="email" placeholder="Your email address" required value={email} onChange={event => setEmail(event.target.value)} disabled={busy} />
+            <button type="submit" disabled={busy}>{busy ? "Subscribing..." : "Subscribe"}</button>
+          </form>
+          {message && <p role="status" className="customer-footer__feedback">{message}</p>}
+          {error && <p role="alert" className="customer-footer__feedback">{error}</p>}
+          <div className="customer-footer__social" aria-label="Social media">
+            {socialLinks.map(({ label, url, Icon }) => safeSocialUrl(url)
+              ? <a key={label} href={safeSocialUrl(url)} aria-label={label} target="_blank" rel="noopener noreferrer"><Icon /></a>
+              : <span key={label} role="img" aria-label={`${label}: link not configured`} title={`${label}: link not configured`}><Icon /></span>)}
+          </div>
+        </section>
+      </div>
+      <p className="customer-footer__copyright">&copy; 2026 Gentle Event Rentals. All Rights Reserved.</p>
+    </div>
+  </footer>;
+}

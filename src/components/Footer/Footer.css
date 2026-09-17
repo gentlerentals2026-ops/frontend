@@ -1,0 +1,47 @@
+.customer-footer { color: #bfc3d0; padding: 28px 16px 88px; }
+.customer-footer *, .customer-footer *::before, .customer-footer *::after { box-sizing: border-box; }
+.customer-footer__inner { max-width: 1120px; margin-inline: auto; }
+.customer-footer__grid { display: grid; gap: 24px; }
+.customer-footer__grid > * { min-width: 0; }
+.customer-footer__logo { display: block; width: 120px; height: 86px; object-fit: contain; object-position: left center; }
+.customer-footer__tagline { margin: 6px 0 16px; color: #fff; font-size: 16px; line-height: 1.4; }
+.customer-footer__contact { display: grid; gap: 8px; font-size: 14px; line-height: 1.5; font-style: normal; }
+.customer-footer__contact > div { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 8px; }
+.customer-footer__contact span { color: #fff; font-weight: 600; }
+.customer-footer__contact p { margin: 0; }
+.customer-footer a { color: inherit; text-decoration: none; overflow-wrap: anywhere; transition: color 160ms ease; }
+.customer-footer a:hover, .customer-footer a:active { color: var(--footer-brand); }
+.customer-footer a:focus-visible, .customer-footer button:focus-visible, .customer-footer input:focus-visible { outline: 2px solid var(--footer-brand); outline-offset: 3px; }
+.customer-footer__links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.customer-footer h2 { margin: 0 0 10px; color: #fff; font-size: 18px; line-height: 1.3; }
+.customer-footer__links ul { list-style: none; margin: 0; padding: 0; }
+.customer-footer__links a { display: inline-block; padding-block: 5px; font-size: 14px; line-height: 1.5; }
+.customer-footer__newsletter > p { margin: 0 0 12px; font-size: 14px; line-height: 1.5; }
+.customer-footer__newsletter h2 { font-size: 20px; }
+.customer-footer__newsletter form { display: grid; gap: 8px; }
+.customer-footer__newsletter label { font-size: 14px; }
+.customer-footer__newsletter input { width: 100%; min-width: 0; height: 44px; padding: 10px 12px; border: 1px solid #777; border-radius: 6px; background: transparent; color: #fff; font: inherit; font-size: 16px; transition: border-color 160ms ease; }
+.customer-footer__newsletter input::placeholder { color: #bfc3d0; opacity: 1; }
+.customer-footer__newsletter input:focus { border-color: var(--footer-brand); }
+.customer-footer__newsletter button { min-height: 44px; padding: 10px 16px; border: 0; border-radius: 6px; background: var(--footer-brand); color: #171717; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; transition: filter 160ms ease; }
+.customer-footer__newsletter button:hover:not(:disabled) { filter: brightness(0.92); }
+.customer-footer__newsletter button:disabled { opacity: 0.65; cursor: wait; }
+.customer-footer__newsletter .customer-footer__feedback { margin-top: 12px; color: #fff; overflow-wrap: anywhere; }
+.customer-footer__social { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.customer-footer__social a, .customer-footer__social > span { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid #555; border-radius: 6px; color: #fff; }
+.customer-footer__social svg { width: 21px; height: 21px; }
+.customer-footer__social a { transition: color 160ms ease, transform 160ms ease; }
+.customer-footer__social a:hover { color: var(--footer-brand); transform: translateY(-2px); }
+.customer-footer__copyright { margin: 24px 0 0; padding-top: 16px; border-top: 1px solid #333; color: #bfc3d0; text-align: center; font-size: 12px; line-height: 1.6; }
+@media (min-width: 768px) {
+  .customer-footer { padding: 36px 24px 88px; }
+  .customer-footer__grid { grid-template-columns: 1fr 1fr; gap: 28px; }
+  .customer-footer__newsletter { grid-column: 1 / -1; max-width: 460px; }
+}
+@media (min-width: 1024px) {
+  .customer-footer { padding: 40px 40px 88px; }
+  .customer-footer__grid { grid-template-columns: 1.1fr 1.3fr 1fr; gap: 28px; }
+  .customer-footer__newsletter { grid-column: auto; }
+  .customer-footer__logo { width: 136px; height: 96px; }
+}
+@media (prefers-reduced-motion: reduce) { .customer-footer a, .customer-footer button, .customer-footer input { transition: none; } .customer-footer__social a:hover { transform: none; } }
