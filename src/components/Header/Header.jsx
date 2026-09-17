@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Badge, Box, Button, Container, IconButton, Menu, MenuItem } from "@mui/material";
+import { Alert, Badge, Box, Button, Container, IconButton, Menu, MenuItem, Snackbar } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import SearchIcon from "@mui/icons-material/Search";
@@ -33,6 +33,8 @@ const AppHeader = () => {
   const { siteSettings } = useSiteSettings();
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [isPreparingBrochure, setIsPreparingBrochure] = React.useState(false);
+  const [brochureError, setBrochureError] = React.useState("");
+  const brochureBusy = React.useRef(false);
   const [search, setSearch] = React.useState("");
   const [rentalsAnchor, setRentalsAnchor] = React.useState(null);
   const [categories, setCategories] = React.useState([]);
@@ -104,18 +106,22 @@ const AppHeader = () => {
   };
 
   const handleDownloadBrochure = async () => {
+    if (brochureBusy.current) return;
     if (siteSettings.brochureUrl) {
       window.open(siteSettings.brochureUrl, "_blank", "noopener,noreferrer");
       return;
     }
     try {
+      brochureBusy.current = true;
+      setBrochureError("");
       setIsPreparingBrochure(true);
       const response = await ProductService.getProducts();
-      downloadBrochurePdf({ siteSettings, products: response?.data || [] });
+      await downloadBrochurePdf({ siteSettings, products: response?.data || [] });
     } catch (error) {
       console.error("Unable to prepare brochure:", error);
-      downloadBrochurePdf({ siteSettings, products: [] });
+      setBrochureError("Unable to prepare the brochure. Please try again.");
     } finally {
+      brochureBusy.current = false;
       setIsPreparingBrochure(false);
     }
   };
@@ -191,6 +197,9 @@ const AppHeader = () => {
       </Box>
       {/* Keep the full-height spacer during collapse so content and scroll position never shift. */}
       <div aria-hidden="true" style={{ height: headerHeight }} />
+      <Snackbar open={Boolean(brochureError)} onClose={() => setBrochureError("")}>
+        <Alert severity="error" onClose={() => setBrochureError("")}>{brochureError}</Alert>
+      </Snackbar>
     </>
   );
 };

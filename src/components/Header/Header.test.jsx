@@ -5,6 +5,7 @@ import AppHeader from "./Header";
 import ProductsListingPage from "../../pages/Products/ProductsListingPage";
 import ProductDetailsPage from "../../pages/Products/ProductDetailsPage";
 import { ProductService } from "../../services/products/Product";
+import { downloadBrochurePdf } from "../../utils/brochure";
 
 jest.setTimeout(30000);
 
@@ -46,6 +47,7 @@ function TestApp() {
   </MemoryRouter>;
 }
 beforeEach(() => {
+  downloadBrochurePdf.mockReset();
   window.matchMedia = jest.fn(() => ({ matches: false }));
   Element.prototype.scrollIntoView = jest.fn();
   Object.defineProperty(window, "scrollY", { configurable: true, value: 0, writable: true });
@@ -54,6 +56,30 @@ beforeEach(() => {
   ProductService.getProductBySlug.mockResolvedValue({ data: products[0] });
   mockAddToCart.mockReturnValue({ unwrap: () => Promise.resolve() });
   window.ResizeObserver = class { observe() {} disconnect() {} };
+});
+
+test("brochure button stays disabled until the asynchronous PDF is ready", async () => {
+  let complete;
+  downloadBrochurePdf.mockReturnValue(new Promise(resolve => { complete = resolve; }));
+  render(<TestApp />);
+  await screen.findByText("Gold Chiavari Chair");
+  await click(screen.getByRole("button", { name: "Download Our Brochure" }));
+  expect(screen.getByRole("button", { name: "Preparing Brochure..." })).toBeDisabled();
+  expect(downloadBrochurePdf).toHaveBeenCalledWith(expect.objectContaining({ products }));
+  await act(async () => complete());
+  expect(screen.getByRole("button", { name: "Download Our Brochure" })).toBeEnabled();
+});
+
+test("failed brochure fetch shows an error instead of downloading an empty catalogue", async () => {
+  const error = jest.spyOn(console, "error").mockImplementation(() => {});
+  render(<TestApp />);
+  await screen.findByText("Gold Chiavari Chair");
+  ProductService.getProducts.mockRejectedValueOnce(new Error("Offline"));
+  await click(screen.getByRole("button", { name: "Download Our Brochure" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("Unable to prepare the brochure");
+  expect(downloadBrochurePdf).not.toHaveBeenCalled();
+  expect(screen.getByRole("button", { name: "Download Our Brochure" })).toBeEnabled();
+  error.mockRestore();
 });
 
 test("scroll collapse uses hysteresis and restores existing controls", async () => {
