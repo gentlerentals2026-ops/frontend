@@ -1,6 +1,7 @@
 import { Box, Typography, Button } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useSiteSettings } from "../../context/SiteSettingsContext";
+import { scrollToCatalogue } from "../../utils/catalogueSearch";
 
 export default function Slider() {
   const { siteSettings } = useSiteSettings();
@@ -97,6 +98,7 @@ export default function Slider() {
         </Typography>
 
         <Button
+          onClick={() => scrollToCatalogue()}
           variant="contained"
           sx={{
             backgroundColor: "white",
@@ -110,7 +112,7 @@ export default function Slider() {
             },
           }}
         >
-          READ MORE
+          Browse Our Items
         </Button>
       </Box>
     </Box>

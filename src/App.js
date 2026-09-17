@@ -14,6 +14,7 @@ import FaqPage from "./pages/Info/FaqPage";
 import PolicyPage from "./pages/Info/PolicyPage";
 import NotFoundPage from "./pages/NotFound/NotFoundPage";
 import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
+import EmailPreferences from "./pages/Info/EmailPreferences";
 const  App = ()=> {
 
   
@@ -29,6 +30,7 @@ const  App = ()=> {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/email-preferences" element={<EmailPreferences />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/faqs" element={<FaqPage />} />

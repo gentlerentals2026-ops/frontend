@@ -46,6 +46,8 @@ function TestApp() {
   </MemoryRouter>;
 }
 beforeEach(() => {
+  window.matchMedia = jest.fn(() => ({ matches: false }));
+  Element.prototype.scrollIntoView = jest.fn();
   Object.defineProperty(window, "scrollY", { configurable: true, value: 0, writable: true });
   mockCartItems = [{ quantity: 2 }, { quantity: 1 }];
   ProductService.getProducts.mockResolvedValue({ data: products });
@@ -114,7 +116,7 @@ test("search button and Enter use the existing listings with partial, case-insen
   expect(screen.getByText("Round Table")).toBeInTheDocument();
   fireEvent.change(input, { target: { value: "not-a-product" } });
   await enter(input);
-  expect(await screen.findByText("No listings match your search.")).toBeInTheDocument();
+  expect(await screen.findByText(/No rental items found for/)).toBeInTheDocument();
   expect(input).toHaveAttribute("enterkeyhint", "search");
 });
 

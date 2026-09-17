@@ -29,7 +29,7 @@ export default function ProductPage() {
   const displayedProducts = isMobile && !showAll ? products.slice(0, 5) : products;
 
   return (
-    <Box sx={{ p: { xs: 2, md: 5 } }}>
+    <Box id="rental-catalogue" sx={{ p: { xs: 2, md: 5 } }}>
       <Typography variant="h4" sx={{ fontWeight: "bold", fontSize: { xs: "1.6rem", md: "2rem" }, mb: 3, textAlign: "center" }}>Chairs & Tables For Rent</Typography>
       {!isLoading && error && <Typography sx={{ textAlign: "center", mb: 3, color: "error.main" }}>{error}</Typography>}
       {!isLoading && !error && displayedProducts.length === 0 && <Typography sx={{ textAlign: "center", mb: 3, color: "gray" }}>No rental items available yet.</Typography>}
