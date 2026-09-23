@@ -96,7 +96,7 @@ test("scroll collapse uses hysteresis and restores existing controls", async () 
   expect(header).toHaveClass("customer-header--collapsed");
   expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
   expect(screen.getByRole("search", { hidden: true })).toHaveAttribute("inert");
-  expect(screen.getByRole("navigation")).toBeInTheDocument();
+  expect(within(header).getByRole("navigation")).toBeInTheDocument();
   for (const y of [101, 98, 80, 51, 600]) {
     scroll(y);
     expect(header).toHaveClass("customer-header--collapsed");
@@ -178,6 +178,25 @@ test("Rentals uses real product categories and filters listings", async () => {
   await waitFor(() => expect(screen.queryByText("Round Table")).not.toBeInTheDocument());
   expect(screen.getByText("Gold Chiavari Chair")).toBeInTheDocument();
   expect(screen.getByTestId("location")).toHaveTextContent("/products?category=Chairs");
+});
+
+test("category and search query compose; All and Clear Search remove only their own restriction", async () => {
+  render(<TestApp />);
+  await screen.findByText("Gold Chiavari Chair");
+  const nav = screen.getByRole("navigation", { name: "Product categories" });
+  const requests = ProductService.getProducts.mock.calls.length;
+  await click(within(nav).getByRole("button", { name: "Chairs", exact: true }));
+  fireEvent.change(screen.getByRole("searchbox"), { target: { value: "Gold" } });
+  await enter(screen.getByRole("searchbox"));
+  expect(screen.getByTestId("location")).toHaveTextContent("category=Chairs&q=Gold");
+  expect(screen.queryByText("Round Table")).not.toBeInTheDocument();
+  await click(within(nav).getByRole("button", { name: "All", exact: true }));
+  expect(screen.getByTestId("location")).toHaveTextContent("/products?q=Gold");
+  await click(within(nav).getByRole("button", { name: "Chairs", exact: true }));
+  await click(screen.getByRole("button", { name: "Clear Search", exact: true }));
+  expect(screen.getByTestId("location")).toHaveTextContent("/products?category=Chairs");
+  expect(screen.queryByText("Round Table")).not.toBeInTheDocument();
+  expect(ProductService.getProducts.mock.calls.length).toBe(requests);
 });
 
 test("filtered catalogue tiles lead to existing detail actions and Order Now quotation handoff", async () => {

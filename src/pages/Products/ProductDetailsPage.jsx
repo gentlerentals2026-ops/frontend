@@ -306,7 +306,7 @@ const ProductDetailsPage = () => {
                   color={product.status === "available" ? "success" : "default"}
                   sx={{ width: "fit-content", textTransform: "capitalize" }}
                 />
-                <Chip label={product.category} variant="outlined" sx={{ textTransform: "capitalize" }} />
+                <Chip label={product.categoryInfo?.name || product.category || "Uncategorized"} variant="outlined" sx={{ textTransform: "capitalize" }} />
               </Stack>
 
               <Typography variant="h3" sx={{ fontWeight: 800 }}>
@@ -351,7 +351,7 @@ const ProductDetailsPage = () => {
                       : "This listing is currently unavailable for booking."}
                   </Typography>
                   <Typography sx={{ color: "text.secondary" }}>
-                  Ideal for {product.category} setups, event halls, weddings, and styled receptions.
+                  Ideal for event setups, event halls, weddings, and styled receptions.
                   </Typography>
                   {!!product.bookedQuantity && (
                     <Typography sx={{ color: "#9a3412", fontWeight: 700 }}>
@@ -399,7 +399,7 @@ const ProductDetailsPage = () => {
 
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                  <Typography><strong>Category:</strong> {product.category}</Typography>
+                  <Typography><strong>Category:</strong> {product.categoryInfo?.name || product.category || "Uncategorized"}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Typography><strong>Available Units:</strong> {product.availableQuantity ?? product.quantityAvailable}</Typography>

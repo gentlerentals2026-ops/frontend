@@ -1,0 +1,4 @@
+.catalogue-category-filter { display: flex; gap: 8px; overflow-x: auto; max-width: 100%; min-width: 0; padding: 3px 0 10px; margin-bottom: 14px; scrollbar-width: thin; }
+.catalogue-category-filter button { flex: 0 0 auto; border: 1px solid #d9cba9; border-radius: 22px; background: #fffdf5; color: #463a20; padding: 9px 16px; font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.catalogue-category-filter button[aria-pressed="true"] { background: #211f17; border-color: #211f17; color: #fff3c4; }
+.catalogue-category-filter button:focus-visible { outline: 2px solid #a85b00; outline-offset: 2px; }

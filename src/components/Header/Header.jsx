@@ -13,6 +13,7 @@ import { cartApi, useGetCartQuery } from "../../services/api/cartApi";
 import { useSiteSettings } from "../../context/SiteSettingsContext";
 import { ProductService } from "../../services/products/Product";
 import { downloadBrochurePdf } from "../../utils/brochure";
+import { productCategories } from "../../utils/productCategories";
 import "./Header.css";
 
 const pages = [
@@ -129,7 +130,9 @@ const AppHeader = () => {
   const submitSearch = (event) => {
     event.preventDefault();
     const query = search.trim();
-    navigate(query ? `/products?${new URLSearchParams({ q: query })}` : "/products");
+    const params = new URLSearchParams(location.search);
+    if (query) params.set("q", query); else params.delete("q");
+    navigate(`/products${params.toString() ? `?${params}` : ""}`);
   };
 
   const openRentals = async (event) => {
@@ -139,7 +142,7 @@ const AppHeader = () => {
     setCategoryStatus("loading");
     try {
       const response = await ProductService.getProducts();
-      setCategories([...new Set((response.data || []).map((product) => product.category).filter(Boolean))].sort());
+      setCategories(productCategories(response.data || []));
       setCategoryStatus("loaded");
     } catch {
       setCategoryStatus("error");
@@ -185,10 +188,10 @@ const AppHeader = () => {
           </div>
         </Container>
         <Menu id="rental-categories" anchorEl={rentalsAnchor} open={Boolean(rentalsAnchor)} onClose={() => setRentalsAnchor(null)} MenuListProps={{ "aria-labelledby": "rentals-toggle" }} PaperProps={{ sx: { maxWidth: "calc(100vw - 32px)", bgcolor: "#fff", color: "#171717" } }}>
-          <MenuItem component={RouterLink} to="/products" onClick={() => setRentalsAnchor(null)}>All rentals</MenuItem>
+          <MenuItem component={RouterLink} to={`/products${new URLSearchParams(location.search).get("q") ? `?${new URLSearchParams({ q: new URLSearchParams(location.search).get("q") })}` : ""}`} onClick={() => setRentalsAnchor(null)}>All rentals</MenuItem>
           {categoryStatus === "loading" && <MenuItem disabled>Loading categories...</MenuItem>}
           {categoryStatus === "error" && <MenuItem onClick={openRentals}>Unable to load categories. Retry</MenuItem>}
-          {categories.map((category) => <MenuItem key={category} component={RouterLink} to={`/products?${new URLSearchParams({ category })}`} onClick={() => setRentalsAnchor(null)} sx={{ whiteSpace: "normal", overflowWrap: "anywhere" }}>{category}</MenuItem>)}
+          {categories.map((category) => <MenuItem key={category.key} component={RouterLink} to={`/products?${new URLSearchParams({ ...(new URLSearchParams(location.search).get("q") ? { q: new URLSearchParams(location.search).get("q") } : {}), category: category.key })}`} onClick={() => setRentalsAnchor(null)} sx={{ whiteSpace: "normal", overflowWrap: "anywhere" }}>{category.name}</MenuItem>)}
         </Menu>
         <Menu id="customer-navigation" anchorEl={anchorElNav} open={Boolean(anchorElNav)} onClose={() => setAnchorElNav(null)} MenuListProps={{ "aria-labelledby": "navigation-toggle" }} PaperProps={{ sx: { width: 250, maxWidth: "calc(100vw - 32px)", bgcolor: "#fff", color: "#171717" } }}>
           {pages.map((page) => <MenuItem key={page.label} component={RouterLink} to={page.path} onClick={() => setAnchorElNav(null)}>{page.label}</MenuItem>)}
