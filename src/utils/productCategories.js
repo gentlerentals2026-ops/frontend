@@ -1,3 +1,8 @@
+export const rentalNavigationCategories = categories => categories
+  .filter(category => category.active !== false && (!category.scope || category.scope === "RENTAL")
+    && category.key.toLowerCase() !== "rental" && category.name.trim().toLowerCase() !== "rental")
+  .sort((a, b) => a.displayOrder - b.displayOrder || a.name.localeCompare(b.name, "en") || a.key.localeCompare(b.key, "en"));
+
 export const productCategory = product => product.categoryInfo || (product.category
   ? { key: product.category, name: product.category.charAt(0).toUpperCase() + product.category.slice(1), displayOrder: 10000 }
   : { key: "__uncategorized", name: "Uncategorized", displayOrder: Number.MAX_SAFE_INTEGER });

@@ -28,7 +28,7 @@ jest.mock("../../services/api/cartApi", () => ({
 jest.mock("../../context/SiteSettingsContext", () => ({
   useSiteSettings: () => ({ siteSettings: { siteName: "Gentle Events", logoUrl: "/logo.png", topBarColor: "#f59e0b", addToCartColor: "#f59e0b" } })
 }));
-jest.mock("../../services/products/Product", () => ({ ProductService: { getProducts: jest.fn(), getProductBySlug: jest.fn() } }));
+jest.mock("../../services/products/Product", () => ({ ProductService: { getProducts: jest.fn(), getProductBySlug: jest.fn(), getRentalCategories: jest.fn() } }));
 jest.mock("../../services/auth/Auth", () => ({ AuthService: { logout: jest.fn() } }));
 jest.mock("../../utils/brochure", () => ({ downloadBrochurePdf: jest.fn() }));
 
@@ -53,6 +53,10 @@ beforeEach(() => {
   Object.defineProperty(window, "scrollY", { configurable: true, value: 0, writable: true });
   mockCartItems = [{ quantity: 2 }, { quantity: 1 }];
   ProductService.getProducts.mockResolvedValue({ data: products });
+  ProductService.getRentalCategories.mockResolvedValue({ data: [
+    { key: "rental", name: "Rental", displayOrder: 0 },
+    ...["Chairs", "Tables", "AstroTurf", "Tents", "Props"].map((name, displayOrder) => ({ key: name, name, displayOrder }))
+  ] });
   ProductService.getProductBySlug.mockResolvedValue({ data: products[0] });
   mockAddToCart.mockReturnValue({ unwrap: () => Promise.resolve() });
   window.ResizeObserver = class { observe() {} disconnect() {} };
@@ -171,9 +175,12 @@ test("hamburger preserves existing routes and closes after navigation", async ()
   expect(screen.getByTestId("location")).toHaveTextContent("/about");
 });
 
-test("Rentals uses real product categories and filters listings", async () => {
+test("Rentals uses the Category API, hides generic Rental and filters listings", async () => {
   render(<TestApp />);
   await click(screen.getByRole("button", { name: "Rental categories" }));
+  await screen.findByRole("menuitem", { name: "Props" });
+  expect(screen.getAllByRole("menuitem").map(item => item.textContent)).toEqual(["All Rentals", "Chairs", "Tables", "AstroTurf", "Tents", "Props"]);
+  expect(ProductService.getRentalCategories).toHaveBeenCalled();
   await click(await screen.findByRole("menuitem", { name: "Chairs" }));
   await waitFor(() => expect(screen.queryByText("Round Table")).not.toBeInTheDocument());
   expect(screen.getByText("Gold Chiavari Chair")).toBeInTheDocument();
@@ -183,16 +190,20 @@ test("Rentals uses real product categories and filters listings", async () => {
 test("category and search query compose; All and Clear Search remove only their own restriction", async () => {
   render(<TestApp />);
   await screen.findByText("Gold Chiavari Chair");
-  const nav = screen.getByRole("navigation", { name: "Product categories" });
+  expect(screen.queryByRole("navigation", { name: "Product categories" })).not.toBeInTheDocument();
+  const selectCategory = async name => {
+    await click(screen.getByRole("button", { name: "Rental categories" }));
+    await click(await screen.findByRole("menuitem", { name, exact: true }));
+  };
   const requests = ProductService.getProducts.mock.calls.length;
-  await click(within(nav).getByRole("button", { name: "Chairs", exact: true }));
+  await selectCategory("Chairs");
   fireEvent.change(screen.getByRole("searchbox"), { target: { value: "Gold" } });
   await enter(screen.getByRole("searchbox"));
   expect(screen.getByTestId("location")).toHaveTextContent("category=Chairs&q=Gold");
   expect(screen.queryByText("Round Table")).not.toBeInTheDocument();
-  await click(within(nav).getByRole("button", { name: "All", exact: true }));
+  await selectCategory("All Rentals");
   expect(screen.getByTestId("location")).toHaveTextContent("/products?q=Gold");
-  await click(within(nav).getByRole("button", { name: "Chairs", exact: true }));
+  await selectCategory("Chairs");
   await click(screen.getByRole("button", { name: "Clear Search", exact: true }));
   expect(screen.getByTestId("location")).toHaveTextContent("/products?category=Chairs");
   expect(screen.queryByText("Round Table")).not.toBeInTheDocument();

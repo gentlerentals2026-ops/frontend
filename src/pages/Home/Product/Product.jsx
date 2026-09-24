@@ -2,7 +2,6 @@ import { Box, Typography, Button, useMediaQuery } from "@mui/material";
 import { useEffect, useState } from "react";
 import { ProductService } from "../../../services/products/Product";
 import CatalogueGrid from "../../../components/Catalogue/CatalogueGrid";
-import CategoryFilter from "../../../components/Catalogue/CategoryFilter";
 import { matchesCategorySearch } from "../../../utils/productCategories";
 import { useSearchParams } from "react-router-dom";
 
@@ -37,7 +36,6 @@ export default function ProductPage() {
   return (
     <Box id="rental-catalogue" sx={{ p: { xs: 2, md: 5 } }}>
       <Typography variant="h4" sx={{ fontWeight: "bold", fontSize: { xs: "1.6rem", md: "2rem" }, mb: 3, textAlign: "center" }}>Chairs & Tables For Rent</Typography>
-      {!isLoading && !error && <CategoryFilter products={products} />}
       {!isLoading && error && <Typography sx={{ textAlign: "center", mb: 3, color: "error.main" }}>{error}</Typography>}
       {!isLoading && !error && displayedProducts.length === 0 && <Typography sx={{ textAlign: "center", mb: 3, color: "gray" }}>No rental items available yet.</Typography>}
       <CatalogueGrid products={displayedProducts} isLoading={isLoading} skeletonCount={isMobile && !showAll ? 5 : 8} />

@@ -2,6 +2,12 @@ import { API } from "../../constant/apiConstant";
 import { getErrorMessage, parseJsonSafely } from "../../utils/http";
 
 export const ProductService = {
+  getRentalCategories: async () => {
+    const response = await fetch(`${API.BASE_URL}/api/categories`, { cache: "no-store" });
+    const json = await parseJsonSafely(response);
+    if (!response.ok) throw new Error(getErrorMessage(response, json, "Failed to fetch rental categories"));
+    return json;
+  },
   getProducts: async () => {
     try {
       const endpoint = `${API.BASE_URL}/api/products`;
